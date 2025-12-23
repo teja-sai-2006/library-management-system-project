@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Kiosk - Seat Booking System</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            padding: 25px;
+            border-bottom: 3px solid rgba(0, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1em;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .kiosk-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 35px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            color: #00ffff;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .section-icon {
+            font-size: 1.2em;
+        }
+
+        /* QR Scanner Section */
+        #qr-reader {
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .qr-manual-input {
+            margin-top: 20px;
+        }
+
+        .qr-manual-input input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .qr-manual-input input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00ffff, #0099cc);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #ff00ff, #cc0099);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Booking Result Display */
+        .booking-result {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .booking-result.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .booking-result h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .booking-info {
+            display: grid;
+            gap: 10px;
+        }
+
+        .booking-info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .booking-info-item label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .booking-info-item span {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        /* Walk-in Section */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #ff00ff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+        }
+
+        .student-info {
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid rgba(255, 0, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .student-info.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .student-info h4 {
+            color: #ff00ff;
+            margin-bottom: 10px;
+        }
+
+        /* Seat Grid */
+        .seat-grid-container {
+            margin: 20px 0;
+            display: none;
+        }
+
+        .seat-grid-container.show {
+            display: block;
+        }
+
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .seat {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .seat.available {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .seat.available:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.7);
+        }
+
+        .seat.selected {
+            background: #2196F3;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.7);
+        }
+
+        .seat.booked {
+            background: #F44336;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .duration-selector {
+            margin: 20px 0;
+        }
+
+        .duration-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .duration-btn {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .duration-btn:hover,
+        .duration-btn.active {
+            background: rgba(255, 0, 255, 0.3);
+            border-color: #ff00ff;
+            transform: translateY(-3px);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px 30px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            z-index: 1001;
+            animation: slideInRight 0.3s ease-out;
+            max-width: 400px;
+        }
+
+        .notification.success {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+
+        .notification.error {
+            background: linear-gradient(45deg, #F44336, #da190b);
+        }
+
+        .notification.info {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .seat-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+            
+            .duration-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏛️ Library Kiosk System</h1>
+        <p>Scan QR Code or Book Your Seat</p>
+    </div>
+
+    <div class="container">
+        <!-- QR Scanner Section -->
+        <div class="kiosk-section">
+            <h2 class="section-title">
+                <span class="section-icon">📱</span>
+                Scan QR Code
+            </h2>
+            
+            <div id="qr-reader"></div>
+            
+            <div class="qr-manual-input">
+                <label style="color: rgba(255,255,255,0.8); margin-bottom: 10px; display: block;">
+                    Or Enter QR Code Manually:
+                </label>
+                <input 
+                    type="text" 
+                    id="manualQrInput" 
+                    placeholder="Paste QR code text here..."
+                />
+                <button class="btn btn-primary" onclick="verifyManualQR()">
+                    Verify QR Code
+                </button>
+            </div>
+
+            <div class="booking-result" id="qrResult">
+                <h3>✅ Booking Verified</h3>
+                <div class="booking-info" id="qrBookingInfo"></div>
+                <button class="btn btn-success" onclick="confirmScannedBooking()">
+                    Confirm Entry
+                </button>
+            </div>
+        </div>
+
+        <!-- Walk-in Booking Section -->
+        <div class="kiosk-section">
+            <h2 class="section-title">
+                <span class="section-icon">🎫</span>
+                Walk-in Booking
+            </h2>
+            
+            <div class="input-group">
+                <label for="rollNumberInput">Enter Your Roll Number:</label>
+                <input 
+                    type="text" 
+                    id="rollNumberInput" 
+                    placeholder="e.g., 22CS001"
+                />
+                <button class="btn btn-secondary" onclick="verifyStudent()" style="margin-top: 10px;">
+                    Verify Student
+                </button>
+            </div>
+
+            <div class="student-info" id="studentInfo">
+                <h4>Welcome!</h4>
+                <div id="studentDetails"></div>
+            </div>
+
+            <div class="seat-grid-container" id="seatGridContainer">
+                <h3 style="color: #ff00ff; margin-bottom: 15px;">Select Your Seat:</h3>
+                <div class="seat-grid" id="walkInSeatGrid"></div>
+                
+                <div class="duration-selector">
+                    <label style="color: rgba(255,255,255,0.8); display: block; margin-bottom: 10px;">
+                        Select Duration:
+                    </label>
+                    <div class="duration-options">
+                        <div class="duration-btn" data-duration="30">30 mins</div>
+                        <div class="duration-btn active" data-duration="60">1 hour</div>
+                        <div class="duration-btn" data-duration="120">2 hours</div>
+                        <div class="duration-btn" data-duration="240">4 hours</div>
+                    </div>
+                </div>
+
+                <button class="btn btn-success" onclick="confirmWalkInBooking()" id="confirmWalkInBtn" disabled>
+                    Book Selected Seat
+                </button>
+            </div>
+        </div>
+
+        <!-- Leave Early Section for Walk-ins -->
+        <div class="kiosk-section" style="margin-top: 30px;">
+            <h2 class="section-title">
+                <span class="section-icon">🚪</span>
+                Leave Early (Walk-in Students)
+            </h2>
+            
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px;">
+                If you booked a seat using a walk-in code and need to leave early, enter your code below:
+            </p>
+
+            <div class="input-group">
+                <label for="leaveCodeInput">Enter Your Walk-in Code:</label>
+                <input 
+                    type="text" 
+                    id="leaveCodeInput" 
+                    placeholder="e.g., A3B9K"
+                    maxlength="5"
+                    style="text-transform: uppercase;"
+                />
+                <button class="btn btn-secondary" onclick="cancelByWalkInCode()" style="margin-top: 10px; background: linear-gradient(45deg, #F44336, #da190b);">
+                    Cancel My Booking
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let html5QrcodeScanner;
+        let currentBookingData = null;
+        let currentStudentData = null;
+        let selectedSeat = null;
+        let selectedDuration = 60;
+
+        // Initialize QR Scanner
+        function initQRScanner() {
+            try {
+                html5QrcodeScanner = new Html5QrcodeScanner(
+                    "qr-reader",
+                    { 
+                        fps: 10, 
+                        qrbox: { width: 250, height: 250 },
+                        aspectRatio: 1.0
+                    }
+                );
+
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            } catch (error) {
+                console.error('QR Scanner initialization failed:', error);
+                showNotification('Camera not available. Please use manual QR entry.', 'error');
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            console.log(`QR Code scanned: ${decodedText}`);
+            verifyQRCode(decodedText);
+        }
+
+        function onScanFailure(error) {
+            // Silent failure - don't spam console
+        }
+
+        // Verify QR Code
+        async function verifyQRCode(qrCode) {
+            try {
+                showNotification('Verifying QR code...', 'info');
+
+                const response = await fetch('/api/kiosk/verify-qr', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ qrCode: qrCode })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentBookingData = result.data;
+                    displayBookingInfo(result.data);
+                    showNotification('✅ QR Code Verified!', 'success');
+                } else {
+                    showNotification('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('QR verification error:', error);
+                showNotification('Failed to verify QR code', 'error');
+            }
+        }
+
+        function verifyManualQR() {
+            const qrCode = document.getElementById('manualQrInput').value.trim();
+            if (!qrCode) {
+                showNotification('Please enter a QR code', 'error');
+                return;
+            }
+            verifyQRCode(qrCode);
+        }
+
+        function displayBookingInfo(booking) {
+            const infoDiv = document.getElementById('qrBookingInfo');
+            const status = booking.status.charAt(0).toUpperCase() + booking.status.slice(1);
+            
+            infoDiv.innerHTML = `
+                <div class="booking-info-item">
+                    <label>Student Name:</label>
+                    <span>${booking.full_name}</span>
+                </div>
+                <div class="booking-info-item">
+                    <label>Roll Number:</label>
+                    <span>${booking.roll_number}</span>
+                </div>
+                <div class="booking-info-item">
+                    <label>Seat Number:</label>
+                    <span>${booking.seat_number}</span>
+                </div>
+                <div class="booking-info-item">
+                    <label>Duration:</label>
+                    <span>${booking.duration} minutes</span>
+                </div>
+                <div class="booking-info-item">
+                    <label>Status:</label>
+                    <span style="color: ${booking.status === 'completed' ? '#4CAF50' : '#00ffff'}">${status}</span>
+                </div>
+            `;
+
+            document.getElementById('qrResult').classList.add('show');
+        }
+
+        async function confirmScannedBooking() {
+            if (!currentBookingData) return;
+
+            try {
+                showNotification('Confirming booking...', 'info');
+
+                // Call the SCAN endpoint to transition pending-scan → scanned
+                const response = await fetch(`/api/bookings/${currentBookingData.id}/scan`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('✅ Entry Confirmed! Seat activated. Welcome to the library!', 'success');
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        resetQRScanner();
+                    }, 3000);
+                } else {
+                    showNotification('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Booking confirmation error:', error);
+                showNotification('Failed to confirm booking', 'error');
+            }
+        }
+
+        function resetQRScanner() {
+            currentBookingData = null;
+            document.getElementById('qrResult').classList.remove('show');
+            document.getElementById('manualQrInput').value = '';
+        }
+
+        // Walk-in Booking Functions
+        async function verifyStudent() {
+            const rollNumber = document.getElementById('rollNumberInput').value.trim();
+            
+            if (!rollNumber) {
+                showNotification('Please enter your roll number', 'error');
+                return;
+            }
+
+            try {
+                showNotification('Verifying student...', 'info');
+
+                const response = await fetch('/api/kiosk/verify-student', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rollNumber: rollNumber })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentStudentData = result.data;
+                    displayStudentInfo(result.data);
+                    await loadSeatsForWalkIn();
+                    showNotification('✅ Student Verified!', 'success');
+                } else {
+                    showNotification('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Student verification error:', error);
+                showNotification('Failed to verify student', 'error');
+            }
+        }
+
+        function displayStudentInfo(student) {
+            const detailsDiv = document.getElementById('studentDetails');
+            const hasEmail = student.email && student.email !== 'null';
+            
+            detailsDiv.innerHTML = `
+                <p><strong>Name:</strong> ${student.full_name}</p>
+                <p><strong>Roll Number:</strong> ${student.roll_number}</p>
+                ${hasEmail ? `<p><strong>Email:</strong> ${student.email}</p>` : ''}
+                ${hasEmail ? '<p style="color: #4CAF50; font-size: 12px; margin-top: 10px;">✓ Has online account</p>' : '<p style="color: #ff9800; font-size: 12px; margin-top: 10px;">⚠ No online account</p>'}
+            `;
+            document.getElementById('studentInfo').classList.add('show');
+        }
+
+        async function loadSeatsForWalkIn() {
+            try {
+                const response = await fetch('/api/seats');
+                const result = await response.json();
+
+                if (result.success) {
+                    displaySeats(result.data);
+                    document.getElementById('seatGridContainer').classList.add('show');
+                }
+            } catch (error) {
+                console.error('Failed to load seats:', error);
+                showNotification('Failed to load seats', 'error');
+            }
+        }
+
+        function displaySeats(seats) {
+            const grid = document.getElementById('walkInSeatGrid');
+            grid.innerHTML = '';
+
+            seats.forEach(seat => {
+                const seatElement = document.createElement('div');
+                seatElement.className = `seat ${seat.status}`;
+                seatElement.textContent = seat.seat_number;
+                seatElement.dataset.seatNumber = seat.seat_number;
+
+                if (seat.status === 'available') {
+                    seatElement.addEventListener('click', () => selectSeat(seat));
+                }
+
+                grid.appendChild(seatElement);
+            });
+        }
+
+        function selectSeat(seat) {
+            // Remove previous selection
+            document.querySelectorAll('.seat.selected').forEach(s => {
+                s.classList.remove('selected');
+                s.classList.add('available');
+            });
+
+            // Select new seat
+            const seatElement = document.querySelector(`[data-seat-number="${seat.seat_number}"]`);
+            seatElement.classList.remove('available');
+            seatElement.classList.add('selected');
+
+            selectedSeat = seat;
+            document.getElementById('confirmWalkInBtn').disabled = false;
+        }
+
+        // Duration selection
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('duration-btn')) {
+                document.querySelectorAll('.duration-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                selectedDuration = parseInt(e.target.dataset.duration);
+            }
+        });
+
+        async function confirmWalkInBooking() {
+            if (!currentStudentData || !selectedSeat) {
+                showNotification('Please select a seat', 'error');
+                return;
+            }
+
+            const hasOnlineAccount = currentStudentData.email && currentStudentData.email !== 'null';
+
+            // If has online account, show choice modal
+            if (hasOnlineAccount) {
+                showBookingOptionsModal();
+            } else {
+                // No online account - book directly and show code
+                await createWalkInBooking(false);
+            }
+        }
+
+        let currentOptionsModal = null;
+
+        function showBookingOptionsModal() {
+            currentOptionsModal = document.createElement('div');
+            currentOptionsModal.id = 'bookingOptionsModal';
+            currentOptionsModal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center;
+                z-index: 2000;
+            `;
+            
+            currentOptionsModal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 30px; border-radius: 15px; max-width: 500px; border: 2px solid #ff00ff;">
+                    <h3 style="color: #ff00ff; margin-bottom: 20px;">Choose Booking Method</h3>
+                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 25px;">
+                        You have an online account. How would you like to access your booking?
+                    </p>
+                    <button id="sendToAccountBtn"
+                            style="width: 100%; padding: 15px; margin-bottom: 15px; background: linear-gradient(45deg, #4CAF50, #45a049); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+                        📱 Send to My Online Account
+                    </button>
+                    <button id="showCodeBtn"
+                            style="width: 100%; padding: 15px; background: linear-gradient(45deg, #2196F3, #1976D2); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+                        🔢 Show Me Walk-in Code
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(currentOptionsModal);
+            
+            // Add event listeners AFTER appending to DOM
+            document.getElementById('sendToAccountBtn').addEventListener('click', handleSendToAccount);
+            document.getElementById('showCodeBtn').addEventListener('click', handleShowCode);
+        }
+
+        function handleSendToAccount() {
+            console.log('Send to account clicked');
+            // Close the booking options modal
+            if (currentOptionsModal) {
+                currentOptionsModal.remove();
+                currentOptionsModal = null;
+            }
+            // Show password prompt
+            showPasswordPrompt();
+        }
+
+        function handleShowCode() {
+            console.log('Show code clicked');
+            // Close the booking options modal
+            if (currentOptionsModal) {
+                currentOptionsModal.remove();
+                currentOptionsModal = null;
+            }
+            // Create walk-in booking with code
+            createWalkInBooking(false);
+        }
+
+        let currentPasswordModal = null;
+
+        function showPasswordPrompt() {
+            console.log('Showing password prompt');
+            currentPasswordModal = document.createElement('div');
+            currentPasswordModal.id = 'passwordModal';
+            currentPasswordModal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center;
+                z-index: 2001;
+            `;
+            
+            currentPasswordModal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 30px; border-radius: 15px; max-width: 450px; border: 2px solid #4CAF50;">
+                    <h3 style="color: #4CAF50; margin-bottom: 15px;">🔐 Verify Your Account</h3>
+                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">
+                        Enter your account password to link this booking to your online account.
+                    </p>
+                    <input type="password" id="accountPassword" placeholder="Enter your password" 
+                           style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; font-size: 16px;">
+                    <div style="display: flex; gap: 10px;">
+                        <button id="verifyLinkBtn"
+                                style="flex: 1; padding: 12px; background: linear-gradient(45deg, #4CAF50, #45a049); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+                            ✅ Verify & Link
+                        </button>
+                        <button id="cancelPasswordBtn"
+                                style="flex: 1; padding: 12px; background: linear-gradient(45deg, #f44336, #d32f2f); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+                            ❌ Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(currentPasswordModal);
+            
+            // Add event listeners
+            document.getElementById('verifyLinkBtn').addEventListener('click', verifyAndLinkToAccount);
+            document.getElementById('cancelPasswordBtn').addEventListener('click', () => {
+                if (currentPasswordModal) {
+                    currentPasswordModal.remove();
+                    currentPasswordModal = null;
+                }
+            });
+            document.getElementById('accountPassword').focus();
+        }
+
+        async function verifyAndLinkToAccount() {
+            const password = document.getElementById('accountPassword').value;
+            
+            if (!password) {
+                showNotification('Please enter your password', 'error');
+                return;
+            }
+
+            try {
+                const verifyBtn = document.getElementById('verifyLinkBtn');
+                if (verifyBtn) verifyBtn.disabled = true;
+                
+                showNotification('Verifying password...', 'info');
+
+                const response = await fetch('/api/kiosk/verify-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rollNumber: currentStudentData.roll_number,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    console.log('Password verified, creating booking with linkToAccount=true');
+                    console.log('selectedSeat:', selectedSeat);
+                    console.log('selectedDuration:', selectedDuration);
+                    console.log('currentStudentData:', currentStudentData);
+                    
+                    // Close the password modal using the reference
+                    if (currentPasswordModal) {
+                        currentPasswordModal.remove();
+                        currentPasswordModal = null;
+                    }
+                    
+                    showNotification('Password verified! Creating booking...', 'success');
+                    
+                    // Call booking function
+                    await createWalkInBooking(true);
+                } else {
+                    if (verifyBtn) verifyBtn.disabled = false;
+                    showNotification('❌ ' + (result.message || 'Incorrect password'), 'error');
+                }
+            } catch (error) {
+                console.error('Password verification error:', error);
+                const verifyBtn = document.getElementById('verifyLinkBtn');
+                if (verifyBtn) verifyBtn.disabled = false;
+                showNotification('Failed to verify password', 'error');
+            }
+        }
+
+        async function createWalkInBooking(linkToAccount) {
+            try {
+                // Validate required data
+                if (!selectedSeat) {
+                    console.error('No seat selected!');
+                    showNotification('Please select a seat first', 'error');
+                    return;
+                }
+                
+                if (!currentStudentData || !currentStudentData.roll_number) {
+                    console.error('No student data!');
+                    showNotification('Please verify student first', 'error');
+                    return;
+                }
+                
+                console.log('Creating walk-in booking:', {
+                    rollNumber: currentStudentData.roll_number,
+                    seatNumber: selectedSeat.seat_number,
+                    duration: selectedDuration,
+                    linkToAccount: linkToAccount
+                });
+                
+                showNotification('Creating booking...', 'info');
+
+                const response = await fetch('/api/kiosk/book-seat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rollNumber: currentStudentData.roll_number,
+                        seatNumber: selectedSeat.seat_number,
+                        duration: selectedDuration,
+                        linkToAccount: linkToAccount
+                    })
+                });
+
+                const result = await response.json();
+                console.log('Booking result:', result);
+
+                if (result.success) {
+                    // Refresh seat grid to show newly booked seat as red
+                    loadSeatsForWalkIn();
+                    
+                    if (linkToAccount) {
+                        showNotification('✅ Booking sent to your online account! You can view it by logging in.', 'success');
+                    } else {
+                        showWalkInCodeModal(result.data);
+                    }
+                    
+                    // Reset after showing result
+                    setTimeout(() => {
+                        resetWalkInBooking();
+                    }, linkToAccount ? 3000 : 10000);
+                } else {
+                    showNotification('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Walk-in booking error:', error);
+                showNotification('Failed to book seat', 'error');
+            }
+        }
+
+        function showWalkInCodeModal(data) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center;
+                z-index: 2000;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 40px; border-radius: 20px; max-width: 600px; border: 3px solid #4CAF50; text-align: center;">
+                    <h2 style="color: #4CAF50; margin-bottom: 20px;">✅ Booking Successful!</h2>
+                    <div style="background: rgba(255,255,255,0.1); padding: 30px; border-radius: 15px; margin: 20px 0;">
+                        <p style="color: rgba(255,255,255,0.7); margin-bottom: 10px; font-size: 14px;">Your Walk-in Code:</p>
+                        <h1 style="color: #ff00ff; font-size: 60px; letter-spacing: 10px; margin: 15px 0; font-family: monospace;">
+                            ${data.walk_in_code}
+                        </h1>
+                        <p style="color: #ff9800; font-size: 14px; margin-top: 15px;">
+                            ⚠ Please write down this code!
+                        </p>
+                    </div>
+                    <div style="background: rgba(76, 175, 80, 0.2); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #4CAF50;">
+                        <p style="color: white; margin-bottom: 10px;"><strong>📍 Seat:</strong> ${data.booking.seat_number}</p>
+                        <p style="color: white; margin-bottom: 10px;"><strong>⏱ Duration:</strong> ${data.booking.duration} minutes</p>
+                        <p style="color: white;"><strong>👤 Name:</strong> ${data.student.full_name}</p>
+                    </div>
+                    <p style="color: rgba(255,255,255,0.8); font-size: 13px; margin: 20px 0;">
+                        Use this code to cancel your booking if you need to leave early.
+                    </p>
+                    <button onclick="this.closest('div').parentElement.remove(); resetWalkInBooking();" 
+                            style="padding: 15px 40px; background: linear-gradient(45deg, #4CAF50, #45a049); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px;">
+                        OK, Got It!
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        async function cancelByWalkInCode() {
+            const code = document.getElementById('leaveCodeInput').value.trim().toUpperCase();
+            
+            if (!code || code.length !== 5) {
+                showNotification('Please enter a valid 5-character walk-in code', 'error');
+                return;
+            }
+
+            try {
+                showNotification('Cancelling booking...', 'info');
+
+                const response = await fetch('/api/kiosk/cancel-by-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ walkInCode: code })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('✅ Booking cancelled successfully! Thank you for visiting.', 'success');
+                    document.getElementById('leaveCodeInput').value = '';
+                } else {
+                    showNotification('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Cancel by code error:', error);
+                showNotification('Failed to cancel booking', 'error');
+            }
+        }
+
+        function resetWalkInBooking() {
+            currentStudentData = null;
+            selectedSeat = null;
+            document.getElementById('rollNumberInput').value = '';
+            document.getElementById('studentInfo').classList.remove('show');
+            document.getElementById('seatGridContainer').classList.remove('show');
+            document.getElementById('confirmWalkInBtn').disabled = true;
+        }
+
+        function showNotification(message, type = 'success') {
+            const existing = document.querySelector('.notification');
+            if (existing) {
+                existing.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initQRScanner();
+            console.log('✅ Library Kiosk System initialized');
+        });
+    </script>
+</body>
+</html>

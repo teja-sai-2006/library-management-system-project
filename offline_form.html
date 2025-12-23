@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignIn & SignUp - Library Management</title>
+    <script src="https://kit.fontawesome.com/64d58efce2.js" crossorigin="anonymous"></script>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap");
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        input {
+            font-family: "Poppins", sans-serif;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            background-color: #fff;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .forms-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .signin-signup {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            left: 75%;
+            width: 50%;
+            transition: 1s 0.7s ease-in-out;
+            display: grid;
+            grid-template-columns: 1fr;
+            z-index: 5;
+        }
+
+        form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 0rem 5rem;
+            transition: all 0.2s 0.7s;
+            overflow: hidden;
+            grid-column: 1 / 2;
+            grid-row: 1 / 2;
+        }
+
+        form.sign-up-form {
+            opacity: 0;
+            z-index: 1;
+        }
+
+        form.sign-in-form {
+            z-index: 2;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            color: #444;
+            margin-bottom: 10px;
+        }
+
+        .libratech-logo {
+            position: absolute;
+            top: 30px;
+            right: 50px;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+            z-index: 10;
+            text-transform: uppercase;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .input-field {
+            max-width: 380px;
+            width: 100%;
+            background-color: #f0f0f0;
+            margin: 10px 0;
+            height: 55px;
+            border-radius: 55px;
+            display: grid;
+            grid-template-columns: 15% 85%;
+            padding: 0 0.4rem;
+            position: relative;
+        }
+
+        .input-field i {
+            text-align: center;
+            line-height: 55px;
+            color: #acacac;
+            transition: 0.5s;
+            font-size: 1.1rem;
+        }
+
+        .input-field input {
+            background: none;
+            outline: none;
+            border: none;
+            line-height: 1;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .input-field input::placeholder {
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .social-text {
+            padding: 0.7rem 0;
+            font-size: 1rem;
+        }
+
+        .social-media {
+            display: flex;
+            justify-content: center;
+        }
+
+        .social-icon {
+            height: 46px;
+            width: 46px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 0.45rem;
+            color: #333;
+            border-radius: 50%;
+            border: 1px solid #333;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: 0.3s;
+        }
+
+        .social-icon:hover {
+            color: #4481eb;
+            border-color: #4481eb;
+        }
+
+        .btn {
+            width: 150px;
+            background-color: #5995fd;
+            border: none;
+            outline: none;
+            height: 49px;
+            border-radius: 49px;
+            color: #fff;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin: 10px 0;
+            cursor: pointer;
+            transition: 0.5s;
+        }
+
+        .btn:hover {
+            background-color: #4d84e2;
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .panels-container {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            top: 0;
+            left: 0;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .container:before {
+            content: "";
+            position: absolute;
+            height: 2000px;
+            width: 2000px;
+            top: -10%;
+            right: 48%;
+            transform: translateY(-50%);
+            background-image: linear-gradient(-45deg, #4481eb 0%, #04befe 100%);
+            transition: 1.8s ease-in-out;
+            border-radius: 50%;
+            z-index: 6;
+        }
+
+        .image {
+            width: 100%;
+            transition: transform 1.1s ease-in-out;
+            transition-delay: 0.4s;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: space-around;
+            text-align: center;
+            z-index: 6;
+        }
+
+        .left-panel {
+            pointer-events: all;
+            padding: 3rem 17% 2rem 12%;
+        }
+
+        .right-panel {
+            pointer-events: none;
+            padding: 3rem 12% 2rem 17%;
+        }
+
+        .panel .content {
+            color: #fff;
+            transition: transform 0.9s ease-in-out;
+            transition-delay: 0.6s;
+        }
+
+        .panel h3 {
+            font-weight: 600;
+            line-height: 1;
+            font-size: 1.5rem;
+        }
+
+        .panel p {
+            font-size: 0.95rem;
+            padding: 0.7rem 0;
+        }
+
+        .btn.transparent {
+            margin: 0;
+            background: none;
+            border: 2px solid #fff;
+            width: 130px;
+            height: 41px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+
+        .right-panel .image,
+        .right-panel .content {
+            transform: translateX(800px);
+        }
+
+        /* ANIMATION */
+        .container.sign-up-mode:before {
+            transform: translate(100%, -50%);
+            right: 52%;
+        }
+
+        .container.sign-up-mode .left-panel .image,
+        .container.sign-up-mode .left-panel .content {
+            transform: translateX(-800px);
+        }
+
+        .container.sign-up-mode .signin-signup {
+            left: 25%;
+        }
+
+        .container.sign-up-mode form.sign-up-form {
+            opacity: 1;
+            z-index: 2;
+        }
+
+        .container.sign-up-mode form.sign-in-form {
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .container.sign-up-mode .right-panel .image,
+        .container.sign-up-mode .right-panel .content {
+            transform: translateX(0%);
+        }
+
+        .container.sign-up-mode .left-panel {
+            pointer-events: none;
+        }
+
+        .container.sign-up-mode .right-panel {
+            pointer-events: all;
+        }
+
+        /* Messages */
+        .message {
+            width: 100%;
+            max-width: 380px;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 0.9rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .error-message {
+            background-color: #ffe6e6;
+            color: #d32f2f;
+            border: 1px solid #d32f2f;
+        }
+
+        .success-message {
+            background-color: #e8f5e9;
+            color: #388e3c;
+            border: 1px solid #388e3c;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-10px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #5995fd;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn.loading .btn-text {
+            display: none;
+        }
+
+        .btn.loading .loading-spinner {
+            display: block;
+        }
+
+        /* Small note text */
+        .input-note {
+            color: #666;
+            font-size: 0.75rem;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+        @media (max-width: 870px) {
+            .container {
+                min-height: 800px;
+                height: 100vh;
+            }
+            .signin-signup {
+                width: 100%;
+                top: 95%;
+                transform: translate(-50%, -100%);
+                transition: 1s 0.8s ease-in-out;
+            }
+
+            .signin-signup,
+            .container.sign-up-mode .signin-signup {
+                left: 50%;
+            }
+
+            .panels-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: 1fr 2fr 1fr;
+            }
+
+            .panel {
+                flex-direction: row;
+                justify-content: space-around;
+                align-items: center;
+                padding: 2.5rem 8%;
+                grid-column: 1 / 2;
+            }
+
+            .right-panel {
+                grid-row: 3 / 4;
+            }
+
+            .left-panel {
+                grid-row: 1 / 2;
+            }
+
+            .image {
+                width: 200px;
+                transition: transform 0.9s ease-in-out;
+                transition-delay: 0.6s;
+            }
+
+            .panel .content {
+                padding-right: 15%;
+                transition: transform 0.9s ease-in-out;
+                transition-delay: 0.8s;
+            }
+
+            .panel h3 {
+                font-size: 1.2rem;
+            }
+
+            .panel p {
+                font-size: 0.7rem;
+                padding: 0.5rem 0;
+            }
+
+            .btn.transparent {
+                width: 110px;
+                height: 35px;
+                font-size: 0.7rem;
+            }
+
+            .container:before {
+                width: 1500px;
+                height: 1500px;
+                transform: translateX(-50%);
+                left: 30%;
+                bottom: 68%;
+                right: initial;
+                top: initial;
+                transition: 2s ease-in-out;
+            }
+
+            .container.sign-up-mode:before {
+                transform: translate(-50%, 100%);
+                bottom: 32%;
+                right: initial;
+            }
+
+            .container.sign-up-mode .left-panel .image,
+            .container.sign-up-mode .left-panel .content {
+                transform: translateY(-300px);
+            }
+
+            .container.sign-up-mode .right-panel .image,
+            .container.sign-up-mode .right-panel .content {
+                transform: translateY(0px);
+            }
+
+            .right-panel .image,
+            .right-panel .content {
+                transform: translateY(300px);
+            }
+
+            .container.sign-up-mode .signin-signup {
+                top: 5%;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        @media (max-width: 570px) {
+            form {
+                padding: 0 1.5rem;
+            }
+
+            .image {
+                display: none;
+            }
+            .panel .content {
+                padding: 0.5rem 1rem;
+            }
+            .container {
+                padding: 1.5rem;
+            }
+
+            .libratech-logo {
+                font-size: 1.5rem;
+                top: 20px;
+                right: 20px;
+            }
+
+            .container:before {
+                bottom: 72%;
+                left: 50%;
+            }
+
+            .container.sign-up-mode:before {
+                bottom: 28%;
+                left: 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LibraTech Branding -->
+        <div class="libratech-logo">LibraTech</div>
+        
+        <div class="forms-container">
+            <div class="signin-signup">
+                <!-- Sign In Form -->
+                <form class="sign-in-form" id="loginForm">
+                    <h2 class="title">Sign In</h2>
+                    <div id="loginMessages"></div>
+                    <div class="input-field">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="loginId" placeholder="Email or Username" required />
+                    </div>
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" placeholder="Password" required />
+                    </div>
+                    <button type="submit" class="btn solid">
+                        <span class="btn-text">Login</span>
+                        <div class="loading-spinner"></div>
+                    </button>
+                    <p class="social-text">Or Sign in with social platforms</p>
+                    <div class="social-media">
+                        <a href="#" class="social-icon">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="social-icon">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-icon">
+                            <i class="fab fa-google"></i>
+                        </a>
+                        <a href="#" class="social-icon">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Sign Up Form -->
+                <form class="sign-up-form" id="registerForm">
+                    <h2 class="title">Sign Up</h2>
+                    <div id="registerMessages"></div>
+                    <div class="input-field">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="fullName" placeholder="Full Name" required />
+                    </div>
+                    <div class="input-field">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="username" placeholder="Username" required />
+                    </div>
+                    <div class="input-field">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="email" placeholder="Email" required />
+                    </div>
+                    <div class="input-field">
+                        <i class="fas fa-id-card"></i>
+                        <input type="text" name="rollNumber" placeholder="College Roll Number" required />
+                    </div>
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" placeholder="Password" required />
+                    </div>
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="confirmPassword" placeholder="Confirm Password" required />
+                    </div>
+                    <button type="submit" class="btn solid">
+                        <span class="btn-text">Sign Up</span>
+                        <div class="loading-spinner"></div>
+                    </button>
+                    <p class="social-text">Or Sign up with social platforms</p>
+                    <div class="social-media">
+                        <a href="#" class="social-icon">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="social-icon">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-icon">
+                            <i class="fab fa-google"></i>
+                        </a>
+                        <a href="#" class="social-icon">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="panels-container">
+            <div class="panel left-panel">
+                <div class="content">
+                    <h3>New here?</h3>
+                    <p>Join our Library Management System and book your study seats easily!</p>
+                    <button class="btn transparent" id="sign-up-btn">Sign Up</button>
+                </div>
+                <img src="./SignIn-SignUp-Form-main/img/log.svg" class="image" alt="" onerror="this.style.display='none'" />
+            </div>
+
+            <div class="panel right-panel">
+                <div class="content">
+                    <h3>One of us?</h3>
+                    <p>Sign in to access your account and manage your bookings!</p>
+                    <button class="btn transparent" id="sign-in-btn">Sign In</button>
+                </div>
+                <img src="./SignIn-SignUp-Form-main/img/register.svg" class="image" alt="" onerror="this.style.display='none'" />
+            </div>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        // Panel switching animation
+        const sign_in_btn = document.querySelector("#sign-in-btn");
+        const sign_up_btn = document.querySelector("#sign-up-btn");
+        const container = document.querySelector(".container");
+
+        sign_up_btn.addEventListener('click', () => {
+            container.classList.add("sign-up-mode");
+            clearMessages();
+        });
+
+        sign_in_btn.addEventListener('click', () => {
+            container.classList.remove("sign-up-mode");
+            clearMessages();
+        });
+
+        // Utility functions
+        function clearMessages() {
+            document.getElementById('loginMessages').innerHTML = '';
+            document.getElementById('registerMessages').innerHTML = '';
+        }
+
+        function showMessage(containerId, message, isError = false) {
+            const container = document.getElementById(containerId);
+            const messageClass = isError ? 'error-message' : 'success-message';
+            container.innerHTML = `<div class="message ${messageClass}">${message}</div>`;
+        }
+
+        function setLoading(form, loading) {
+            const btn = form.querySelector('.btn');
+            if (loading) {
+                btn.classList.add('loading');
+                btn.disabled = true;
+            } else {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        // Login Form Handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearMessages();
+
+            const formData = new FormData(e.target);
+            const data = {
+                loginId: formData.get('loginId').trim(),
+                password: formData.get('password')
+            };
+
+            // Validation
+            if (!data.loginId || !data.password) {
+                showMessage('loginMessages', '⚠️ Please fill in all fields', true);
+                return;
+            }
+
+            setLoading(e.target, true);
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Store user data and token
+                    const userData = {
+                        id: result.data.id,
+                        fullName: result.data.full_name,
+                        email: result.data.email,
+                        loginId: result.data.login_id
+                    };
+                    localStorage.setItem('currentUser', JSON.stringify(userData));
+                    
+                    // Store authentication token
+                    if (result.data.token) {
+                        localStorage.setItem('auth_token', result.data.token);
+                        console.log('✅ Authentication token stored');
+                    }
+
+                    showMessage('loginMessages', `✅ Welcome back, ${result.data.full_name}!`);
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } else {
+                    showMessage('loginMessages', `⚠️ ${result.message || 'Login failed'}`, true);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('loginMessages', '⚠️ Network error. Please check if the server is running.', true);
+            } finally {
+                setLoading(e.target, false);
+            }
+        });
+
+        // Register Form Handler
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearMessages();
+
+            const formData = new FormData(e.target);
+            const data = {
+                fullName: formData.get('fullName').trim(),
+                username: formData.get('username').trim(),
+                email: formData.get('email').trim(),
+                rollNumber: formData.get('rollNumber').trim(),
+                password: formData.get('password'),
+                confirmPassword: formData.get('confirmPassword')
+            };
+
+            // Validation
+            if (!data.fullName || !data.username || !data.email || !data.rollNumber || !data.password || !data.confirmPassword) {
+                showMessage('registerMessages', '⚠️ Please fill in all fields', true);
+                return;
+            }
+
+            if (data.password !== data.confirmPassword) {
+                showMessage('registerMessages', '⚠️ Passwords do not match', true);
+                return;
+            }
+
+            if (data.password.length < 6) {
+                showMessage('registerMessages', '⚠️ Password must be at least 6 characters', true);
+                return;
+            }
+
+            setLoading(e.target, true);
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullName: data.fullName,
+                        username: data.username,
+                        email: data.email,
+                        rollNumber: data.rollNumber,
+                        password: data.password
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Store user data and token
+                    const userData = {
+                        id: result.data.id,
+                        fullName: result.data.full_name,
+                        email: result.data.email,
+                        loginId: result.data.login_id
+                    };
+                    localStorage.setItem('currentUser', JSON.stringify(userData));
+                    
+                    // Store authentication token
+                    if (result.data.token) {
+                        localStorage.setItem('auth_token', result.data.token);
+                        console.log('✅ Authentication token stored');
+                    }
+
+                    showMessage('registerMessages', `✅ Welcome ${result.data.full_name}! Account created successfully!`);
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+                } else {
+                    showMessage('registerMessages', `⚠️ ${result.message || 'Registration failed'}`, true);
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showMessage('registerMessages', '⚠️ Network error. Please check if the server is running.', true);
+            } finally {
+                setLoading(e.target, false);
+            }
+        });
+
+        // Social login placeholders
+        document.querySelectorAll('.social-icon').forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('Social login coming soon!');
+            });
+        });
+
+        console.log('✅ Sign In/Sign Up page initialized');
+    </script>
+</body>
+</html>

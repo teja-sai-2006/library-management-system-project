@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Seat Booking System</title>
+    <!-- QR Code Generator Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 50%, #000000 100%);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            overflow-x: auto;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            padding: 20px;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-welcome {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00ffff, #0099cc);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+
+        .seat-map-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .seat-map-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .seat-map-title {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #00ffff;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .available { background: #4CAF50; }
+        .selected { background: #2196F3; }
+        .booked { background: #F44336; }
+        .maintenance { background: #FF9800; }
+
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .seat {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .seat:hover:not(.booked):not(.maintenance) {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .seat.available {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .seat.selected {
+            background: #2196F3;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.7);
+        }
+
+        .seat.booked {
+            background: #F44336;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .seat.maintenance {
+            background: #FF9800;
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .booking-panel,
+        .my-bookings-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #00ffff;
+            text-align: center;
+        }
+
+        .selected-seat-info {
+            background: rgba(33, 150, 243, 0.1);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .duration-selector {
+            margin-bottom: 20px;
+        }
+
+        .duration-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .duration-btn {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .duration-btn:hover,
+        .duration-btn.active {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            transform: translateY(-2px);
+        }
+
+        .booking-details {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .booking-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #00ffff;
+        }
+
+        .booking-item h4 {
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .booking-item p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin: 2px 0;
+        }
+
+        .qr-container {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .qr-code {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .group-booking-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.2);
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .time-selector {
+            margin-bottom: 20px;
+        }
+
+        .time-selector label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .time-input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .time-input:focus {
+            outline: none;
+            border-color: #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .seat-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .seat-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .seat {
+                width: 35px;
+                height: 35px;
+                font-size: 10px;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 1001;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.success {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+
+        .notification.error {
+            background: linear-gradient(45deg, #F44336, #da190b);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>📚 Library Seat Booking System</h1>
+            <div class="user-info">
+                <span class="user-welcome" id="userWelcome">Welcome!</span>
+                <button class="btn btn-secondary" onclick="goToDashboard()">Dashboard</button>
+                <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="seat-map-container">
+            <div class="seat-map-header">
+                <h2 class="seat-map-title">Select Your Seat</h2>
+                
+                <!-- Time Range Filter -->
+                <div class="time-filter-panel" style="margin: 20px auto; max-width: 700px; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 12px; border: 1px solid rgba(0,255,255,0.3);">
+                    <h4 style="color: #00ffff; margin-bottom: 15px; text-align: center;">🔍 Filter Seats by Date & Time Availability</h4>
+                    <div style="display: flex; gap: 15px; align-items: end; flex-wrap: wrap; justify-content: center;">
+                        <div style="flex: 1; min-width: 150px;">
+                            <label style="display: block; margin-bottom: 5px; color: rgba(255,255,255,0.8); font-size: 14px;">Date:</label>
+                            <input type="date" id="filterDate" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(0,255,255,0.5); background: rgba(0,0,0,0.3); color: white; font-size: 14px;" />
+                        </div>
+                        <div style="flex: 1; min-width: 130px;">
+                            <label style="display: block; margin-bottom: 5px; color: rgba(255,255,255,0.8); font-size: 14px;">Start Time:</label>
+                            <input type="time" id="filterStartTime" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(0,255,255,0.5); background: rgba(0,0,0,0.3); color: white; font-size: 14px;" />
+                        </div>
+                        <div style="flex: 1; min-width: 130px;">
+                            <label style="display: block; margin-bottom: 5px; color: rgba(255,255,255,0.8); font-size: 14px;">End Time:</label>
+                            <input type="time" id="filterEndTime" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(0,255,255,0.5); background: rgba(0,0,0,0.3); color: white; font-size: 14px;" />
+                        </div>
+                        <button onclick="filterSeatsByTime()" class="btn btn-primary" style="padding: 10px 25px;">
+                            Show Available
+                        </button>
+                        <button onclick="clearTimeFilter()" class="btn btn-secondary" style="padding: 10px 25px;">
+                            Clear Filter
+                        </button>
+                    </div>
+                    <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 10px; text-align: center;">
+                        Filter seats to see which ones are free during your desired date & time slot
+                    </p>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color available"></div>
+                        <span>Available</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color selected"></div>
+                        <span>Selected</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color booked"></div>
+                        <span>Booked</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color maintenance"></div>
+                        <span>Maintenance</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="seat-grid" id="seatGrid">
+                <!-- Seats will be generated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="booking-panel">
+                <h3 class="panel-title">Book Your Seat</h3>
+                
+                <div id="seatSelectionPrompt">
+                    <p style="text-align: center; color: rgba(255,255,255,0.6);">
+                        Please select a seat from the map
+                    </p>
+                </div>
+
+                <div id="bookingForm" style="display: none;">
+                    <div class="selected-seat-info">
+                        <h4>Selected Seat: <span id="selectedSeatId"></span></h4>
+                        <p>Row <span id="selectedRow"></span>, Column <span id="selectedCol"></span></p>
+                    </div>
+
+                    <div class="time-selector">
+                        <label>Select Date:</label>
+                        <input type="date" id="startDateInput" class="time-input" style="margin-bottom: 15px;" />
+                        
+                        <label>Select Start Time:</label>
+                        <input type="time" id="startTimeInput" class="time-input" />
+                        <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 5px;">Leave empty for current date/time</p>
+                    </div>
+
+                    <div class="duration-selector">
+                        <label>Select Duration:</label>
+                        <div class="duration-options">
+                            <div class="duration-btn" data-duration="30">30 mins</div>
+                            <div class="duration-btn active" data-duration="60">1 hour</div>
+                            <div class="duration-btn" data-duration="120">2 hours</div>
+                            <div class="duration-btn" data-duration="240">4 hours</div>
+                        </div>
+                    </div>
+
+                    <div class="booking-details">
+                        <p><strong>Start Time:</strong> <span id="startTime"></span></p>
+                        <p><strong>End Time:</strong> <span id="endTime"></span></p>
+                        <p><strong>Duration:</strong> <span id="duration">60 minutes</span></p>
+                    </div>
+
+                    <button class="btn btn-primary" style="width: 100%;" onclick="bookSeat()">
+                        Book This Seat
+                    </button>
+
+                    <div class="group-booking-section">
+                        <h4 style="color: #ff00ff; margin-bottom: 10px;">Group Booking</h4>
+                        <button class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;" onclick="openGroupModal()">
+                            Create Group Booking
+                        </button>
+                        <p style="font-size: 12px; color: rgba(255,255,255,0.6);">
+                            Book multiple seats for your study group
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="my-bookings-panel">
+                <h3 class="panel-title">My Bookings</h3>
+                
+                <!-- Daily Usage Stats -->
+                <div id="dailyUsageStats" style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(0,255,255,0.3);">
+                    <h4 style="color: #00ffff; margin-bottom: 10px; font-size: 16px;">📊 Today's Usage</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;">
+                        <div>
+                            <span style="color: rgba(255,255,255,0.7);">Sessions Used:</span>
+                            <strong id="sessionsUsed" style="color: #00ffff;">0/4</strong>
+                        </div>
+                        <div>
+                            <span style="color: rgba(255,255,255,0.7);">Sessions Left:</span>
+                            <strong id="sessionsLeft" style="color: #4caf50;">4</strong>
+                        </div>
+                        <div>
+                            <span style="color: rgba(255,255,255,0.7);">Time Used:</span>
+                            <strong id="timeUsed" style="color: #ff9800;">0 min</strong>
+                        </div>
+                        <div>
+                            <span style="color: rgba(255,255,255,0.7);">Time Left:</span>
+                            <strong id="timeLeft" style="color: #4caf50;">240 min</strong>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; background: rgba(0,0,0,0.3); border-radius: 5px; height: 8px; overflow: hidden;">
+                        <div id="usageProgressBar" style="height: 100%; background: linear-gradient(90deg, #4caf50, #ff9800, #f44336); width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                    <p style="font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 8px; text-align: center;">
+                        ⚠️ Max 4 sessions per day • Max 240 minutes (4 hours) total
+                    </p>
+                </div>
+                
+                <div id="myBookings">
+                    <!-- Bookings will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Booking Modal -->
+    <div id="groupModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #ff00ff; margin-bottom: 20px;">Create Group Booking</h3>
+            
+            <div class="form-group">
+                <label for="groupName">Group Name:</label>
+                <input type="text" id="groupName" placeholder="Enter group name">
+            </div>
+            
+            <div class="form-group">
+                <label for="groupDescription">Description:</label>
+                <textarea id="groupDescription" rows="3" placeholder="Enter group description"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="memberEmails">Members (Email or Username, comma-separated):</label>
+                <textarea id="memberEmails" rows="3" placeholder="email1@example.com, username1, email2@example.com, username2"></textarea>
+                <small style="color: #888; font-size: 12px; margin-top: 5px; display: block;">
+                    💡 You can mix emails and usernames: john@email.com, johndoe, mary@email.com, marysue
+                </small>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeGroupModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="createGroupBooking()">Create Group</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #00ffff; margin-bottom: 20px; text-align: center;">Booking Confirmation</h3>
+            <div id="qrContent">
+                <!-- QR code and details will be inserted here -->
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn btn-primary" onclick="closeQRModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Helper Functions
+        class UserManager {
+            getCurrentUser() {
+                return JSON.parse(localStorage.getItem('currentUser')) || null;
+            }
+
+            logout() {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('auth_token');
+            }
+        }
+
+        class SeatManager {
+            getAuthHeaders() {
+                const token = localStorage.getItem('auth_token');
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                return headers;
+            }
+
+            async getAllSeats() {
+                const response = await fetch('/api/seats', {
+                    headers: this.getAuthHeaders()
+                });
+                const result = await response.json();
+                if (result.success) {
+                    return result.data.map(seat => ({
+                        id: seat.seat_number,
+                        row: seat.row,
+                        column: seat.column,
+                        status: seat.status,
+                        bookingId: seat.booking_id,
+                        lastUpdated: seat.last_updated
+                    }));
+                }
+                throw new Error(result.error || 'Failed to fetch seats');
+            }
+
+            async bookSeat(seatId, duration = 60, startTime = null) {
+                const body = {
+                    seatNumber: seatId,
+                    duration: duration
+                };
+                
+                if (startTime) {
+                    body.startTime = startTime.toISOString();
+                }
+                
+                const response = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify(body)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    return {
+                        id: result.data.id,
+                        seatId: result.data.seat_number,
+                        userId: result.data.user_id,
+                        startTime: result.data.start_time,
+                        endTime: result.data.end_time,
+                        duration: result.data.duration,
+                        status: result.data.status,
+                        qrCode: result.data.qr_code,
+                        createdAt: result.data.created_at,
+                        scannedAt: result.data.scanned_at,
+                        leftEarlyAt: result.data.left_early_at
+                    };
+                }
+                throw new Error(result.error || 'Failed to book seat');
+            }
+
+            async scanBooking(bookingId) {
+                const response = await fetch(`/api/bookings/${bookingId}/scan`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders()
+                });
+                const result = await response.json();
+                if (result.success) {
+                    return result.data;
+                }
+                throw new Error(result.error || 'Failed to scan booking');
+            }
+
+            async leaveEarly(bookingId) {
+                const response = await fetch(`/api/bookings/${bookingId}/leave-early`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders()
+                });
+                const result = await response.json();
+                if (result.success) {
+                    return result.data;
+                }
+                throw new Error(result.error || 'Failed to leave seat');
+            }
+
+            async reallocateSeat(bookingId, newSeatId) {
+                const response = await fetch(`/api/bookings/${bookingId}/reallocate`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify({ newSeatId })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    return result.data;
+                }
+                throw new Error(result.error || 'Failed to reallocate seat');
+            }
+
+            async getDailyUsage() {
+                const response = await fetch('/api/user/daily-usage', {
+                    headers: this.getAuthHeaders()
+                });
+                const result = await response.json();
+                if (result.success) {
+                    return result.data;
+                }
+                throw new Error(result.error || 'Failed to get daily usage');
+            }
+
+            async getUserBookings() {
+                const response = await fetch('/api/bookings/user', {
+                    headers: this.getAuthHeaders()
+                });
+                const result = await response.json();
+                if (result.success) {
+                    return result.data.map(booking => ({
+                        id: booking.id,
+                        seatId: booking.seat_number,
+                        userId: booking.user_id,
+                        startTime: booking.start_time,
+                        endTime: booking.end_time,
+                        duration: booking.duration,
+                        status: booking.status,
+                        qrCode: booking.qr_code,
+                        createdAt: booking.created_at
+                    }));
+                }
+                throw new Error(result.error || 'Failed to fetch bookings');
+            }
+
+            async cancelBooking(bookingId) {
+                const response = await fetch(`/api/bookings/${bookingId}/cancel`, {
+                    method: 'POST',
+                    headers: this.getAuthHeaders()
+                });
+                const result = await response.json();
+                if (result.success) {
+                    return result.data;
+                }
+                throw new Error(result.error || 'Failed to cancel booking');
+            }
+        }
+
+        // Initialize managers
+        const userManager = new UserManager();
+        const seatManager = new SeatManager();
+        
+        // Global variables
+        let selectedSeat = null;
+        let selectedDuration = 60;
+        let currentTimeFilter = null; // {startTime, endTime}
+
+        // Time filter functions
+        async function filterSeatsByTime() {
+            const startTimeInput = document.getElementById('filterStartTime').value;
+            const endTimeInput = document.getElementById('filterEndTime').value;
+            const dateInput = document.getElementById('filterDate').value;
+            
+            if (!startTimeInput || !endTimeInput) {
+                showNotification('Please select both start and end time', 'error');
+                return;
+            }
+            
+            // Get date (default to today if not specified)
+            const filterDate = dateInput ? new Date(dateInput) : new Date();
+            const [startHour, startMin] = startTimeInput.split(':');
+            const [endHour, endMin] = endTimeInput.split(':');
+            
+            const startTime = new Date(filterDate.getFullYear(), filterDate.getMonth(), filterDate.getDate(), parseInt(startHour), parseInt(startMin));
+            const endTime = new Date(filterDate.getFullYear(), filterDate.getMonth(), filterDate.getDate(), parseInt(endHour), parseInt(endMin));
+            
+            if (endTime <= startTime) {
+                showNotification('End time must be after start time', 'error');
+                return;
+            }
+            
+            currentTimeFilter = { startTime, endTime };
+            await generateSeatMap(); // Reload with filter
+            
+            const dateStr = dateInput || 'today';
+            showNotification(`Showing seats available on ${dateStr}, ${startTimeInput} - ${endTimeInput}`, 'success');
+        }
+        
+        function clearTimeFilter() {
+            currentTimeFilter = null;
+            document.getElementById('filterDate').value = '';
+            document.getElementById('filterStartTime').value = '';
+            document.getElementById('filterEndTime').value = '';
+            generateSeatMap(); // Reload without filter
+            showNotification('Filter cleared - showing all seats', 'success');
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            initializePage();
+            setDefaultTimeFilter();  // Set current time as default
+            generateSeatMap();
+            loadMyBookings();
+            updateTimeDisplay();
+            
+            // Update time display every minute
+            setInterval(updateTimeDisplay, 60000);
+            
+            // Auto-refresh every 30 seconds
+            setInterval(() => {
+                generateSeatMap();
+                loadMyBookings();
+            }, 30000);
+        });
+        
+        function setDefaultTimeFilter() {
+            const now = new Date();
+            const currentHours = String(now.getHours()).padStart(2, '0');
+            const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+            const currentTime = `${currentHours}:${currentMinutes}`;
+            
+            // Set current date
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const currentDate = `${year}-${month}-${day}`;
+            
+            document.getElementById('filterDate').value = currentDate;
+            document.getElementById('filterStartTime').value = currentTime;
+            
+            // Set end time to 1 hour from now
+            const endTime = new Date(now.getTime() + 60 * 60 * 1000);
+            const endHours = String(endTime.getHours()).padStart(2, '0');
+            const endMinutes = String(endTime.getMinutes()).padStart(2, '0');
+            document.getElementById('filterEndTime').value = `${endHours}:${endMinutes}`;
+            
+            // Also set booking form date to today
+            document.getElementById('startDateInput').value = currentDate;
+        }
+
+        async function initializePage() {
+            const currentUser = userManager.getCurrentUser();
+            const token = localStorage.getItem('auth_token');
+            
+            if (!currentUser || !token) {
+                console.error('No user or token found, redirecting to login');
+                window.location.href = 'offline_form.html';
+                return;
+            }
+            
+            // Verify token with backend
+            try {
+                const response = await fetch('/api/user/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const result = await response.json();
+                
+                if (!result.success) {
+                    // Token expired or invalid, redirect to login
+                    console.error('Token invalid:', result);
+                    showNotification('Session expired. Please login again.', 'error');
+                    setTimeout(() => {
+                        userManager.logout();
+                        localStorage.removeItem('auth_token');
+                        window.location.href = 'offline_form.html';
+                    }, 2000);
+                    return;
+                }
+                
+                console.log('✅ Token verified:', result.data);
+            } catch (error) {
+                console.error('Token verification failed:', error);
+                showNotification('Authentication error. Please login again.', 'error');
+                setTimeout(() => {
+                    userManager.logout();
+                    localStorage.removeItem('auth_token');
+                    window.location.href = 'offline_form.html';
+                }, 2000);
+                return;
+            }
+            
+            document.getElementById('userWelcome').textContent = `Welcome, ${currentUser.fullName}!`;
+        }
+
+        async function generateSeatMap() {
+            const seatGrid = document.getElementById('seatGrid');
+            seatGrid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: rgba(255,255,255,0.6);">Loading seats...</p>';
+            
+            try {
+                let seats;
+                
+                // If time filter is active, fetch filtered seats
+                if (currentTimeFilter) {
+                    const startISO = currentTimeFilter.startTime.toISOString();
+                    const endISO = currentTimeFilter.endTime.toISOString();
+                    
+                    const response = await fetch(`/api/seats/available?start_time=${encodeURIComponent(startISO)}&end_time=${encodeURIComponent(endISO)}`, {
+                        headers: seatManager.getAuthHeaders()
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Mark all filtered seats as available
+                        seats = result.data.map(seat => ({
+                            id: seat.seat_number,
+                            row: seat.row,
+                            column: seat.column,
+                            status: 'available', // All returned seats are available in this time slot
+                            bookingId: null
+                        }));
+                    } else {
+                        throw new Error(result.error || 'Failed to fetch filtered seats');
+                    }
+                } else {
+                    // No filter - get all seats with their current status
+                    seats = await seatManager.getAllSeats();
+                }
+                
+                seatGrid.innerHTML = '';
+                
+                seats.forEach(seat => {
+                    const seatElement = document.createElement('div');
+                    seatElement.className = `seat ${seat.status}`;
+                    seatElement.textContent = seat.id;
+                    seatElement.dataset.seatId = seat.id;
+                    seatElement.dataset.row = seat.row;
+                    seatElement.dataset.col = seat.column;
+                    
+                    // Allow clicking on available seats (or filtered available seats)
+                    if (seat.status === 'available' || currentTimeFilter) {
+                        seatElement.addEventListener('click', () => selectSeat(seat));
+                    }
+                    
+                    seatGrid.appendChild(seatElement);
+                });
+                
+                // If filter active and no seats found
+                if (currentTimeFilter && seats.length === 0) {
+                    seatGrid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: #ff9800;">No seats available in selected time range</p>';
+                }
+            } catch (error) {
+                console.error('Error loading seats:', error);
+                seatGrid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: #f44336;">Failed to load seats. Please refresh.</p>';
+            }
+        }
+
+        function selectSeat(seat) {
+            // Remove previous selection
+            document.querySelectorAll('.seat.selected').forEach(s => {
+                s.classList.remove('selected');
+                s.classList.add('available');
+            });
+            
+            // Select new seat
+            const seatElement = document.querySelector(`[data-seat-id="${seat.id}"]`);
+            seatElement.classList.remove('available');
+            seatElement.classList.add('selected');
+            
+            selectedSeat = seat;
+            
+            // Update UI
+            document.getElementById('seatSelectionPrompt').style.display = 'none';
+            document.getElementById('bookingForm').style.display = 'block';
+            
+            document.getElementById('selectedSeatId').textContent = seat.id;
+            document.getElementById('selectedRow').textContent = seat.row;
+            document.getElementById('selectedCol').textContent = seat.column;
+            
+            updateTimeDisplay();
+        }
+
+        function updateTimeDisplay() {
+            const now = new Date();
+            const endTime = new Date(now.getTime() + selectedDuration * 60000);
+            
+            document.getElementById('startTime').textContent = now.toLocaleTimeString();
+            document.getElementById('endTime').textContent = endTime.toLocaleTimeString();
+            document.getElementById('duration').textContent = `${selectedDuration} minutes`;
+        }
+
+        // Duration selection
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('duration-btn')) {
+                document.querySelectorAll('.duration-btn').forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+                selectedDuration = parseInt(e.target.dataset.duration);
+                updateTimeDisplay();
+            }
+        });
+
+        async function bookSeat() {
+            if (!selectedSeat) {
+                showNotification('Please select a seat first', 'error');
+                return;
+            }
+
+            const currentUser = userManager.getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'offline_form.html';
+                return;
+            }
+
+            try {
+                const startTimeInput = document.getElementById('startTimeInput').value;
+                const startDateInput = document.getElementById('startDateInput').value;
+                let startTime = null;
+                
+                if (startTimeInput || startDateInput) {
+                    // Get date (default to today if not specified)
+                    const bookingDate = startDateInput ? new Date(startDateInput) : new Date();
+                    const [hours, minutes] = startTimeInput ? startTimeInput.split(':') : [new Date().getHours(), new Date().getMinutes()];
+                    
+                    // Create datetime with selected date and time
+                    startTime = new Date(bookingDate.getFullYear(), bookingDate.getMonth(), bookingDate.getDate(), parseInt(hours), parseInt(minutes));
+                    
+                    // Validation: Don't allow booking in the past
+                    if (startTime < new Date()) {
+                        showNotification('Cannot book for past time. Please select a future time.', 'error');
+                        return;
+                    }
+                }
+                
+                showNotification('Booking seat...', 'info');
+                const booking = await seatManager.bookSeat(selectedSeat.id, selectedDuration, startTime);
+                showNotification('✅ Seat booked! Go to library kiosk to scan QR within 10 minutes of start time.', 'success');
+                
+                // Update UI
+                await generateSeatMap();
+                await loadMyBookings();
+                
+                // Reset selection
+                selectedSeat = null;
+                document.getElementById('seatSelectionPrompt').style.display = 'block';
+                document.getElementById('bookingForm').style.display = 'none';
+                
+                // Show QR code
+                showBookingConfirmation(booking);
+                
+            } catch (error) {
+                console.error('Booking error:', error);
+                showNotification(error.message || 'Failed to book seat', 'error');
+            }
+        }
+
+        async function loadMyBookings() {
+            const currentUser = userManager.getCurrentUser();
+            if (!currentUser) return;
+            
+            const container = document.getElementById('myBookings');
+            container.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6);">Loading...</p>';
+            
+            try {
+                console.log('Loading bookings for user:', currentUser.id);
+                const bookings = await seatManager.getUserBookings();
+                console.log('User bookings:', bookings);
+                
+                // Get daily usage info
+                let dailyUsage = null;
+                try {
+                    dailyUsage = await seatManager.getDailyUsage();
+                    console.log('Daily usage:', dailyUsage);
+                    
+                    // Update usage stats display
+                    if (dailyUsage) {
+                        const sessionsUsed = dailyUsage.section_count || 0;
+                        const sessionsLeft = dailyUsage.sections_remaining || 4;
+                        const minutesUsed = dailyUsage.minutes_used || 0;
+                        const minutesLeft = dailyUsage.minutes_remaining || 240;
+                        const usagePercent = (minutesUsed / 240) * 100;
+                        
+                        document.getElementById('sessionsUsed').textContent = `${sessionsUsed}/4`;
+                        document.getElementById('sessionsLeft').textContent = sessionsLeft;
+                        document.getElementById('timeUsed').textContent = `${minutesUsed} min`;
+                        document.getElementById('timeLeft').textContent = `${minutesLeft} min`;
+                        document.getElementById('usageProgressBar').style.width = `${usagePercent}%`;
+                        
+                        // Color coding
+                        document.getElementById('sessionsUsed').style.color = sessionsUsed >= 4 ? '#f44336' : sessionsUsed >= 3 ? '#ff9800' : '#00ffff';
+                        document.getElementById('sessionsLeft').style.color = sessionsLeft === 0 ? '#f44336' : sessionsLeft <= 1 ? '#ff9800' : '#4caf50';
+                        document.getElementById('timeUsed').style.color = minutesUsed >= 240 ? '#f44336' : minutesUsed >= 180 ? '#ff9800' : '#ff9800';
+                        document.getElementById('timeLeft').style.color = minutesLeft === 0 ? '#f44336' : minutesLeft <= 60 ? '#ff9800' : '#4caf50';
+                    }
+                } catch (error) {
+                    console.warn('Could not fetch daily usage:', error);
+                }
+                
+                // Filter - show pending-scan, scanned, active (walk-in), and leave-early bookings
+                const activeBookings = bookings.filter(b => 
+                    b.status === 'pending-scan' || b.status === 'scanned' || b.status === 'active' || b.status === 'leave-early'
+                );
+                
+                let html = '';
+                
+                if (activeBookings.length === 0) {
+                    html += '<p style="text-align: center; color: rgba(255,255,255,0.6);">No active bookings</p>';
+                    container.innerHTML = html;
+                    return;
+                }
+            
+                html += activeBookings.map(booking => {
+                    // Parse dates safely - SQLite returns ISO strings
+                    const startTime = new Date(booking.startTime.replace(' ', 'T'));
+                    const endTime = new Date(booking.endTime.replace(' ', 'T'));
+                    const now = new Date();
+                    
+                    // Validate dates
+                    if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+                        console.error('Invalid date in booking:', booking);
+                        return ''; // Skip this booking
+                    }
+                    
+                    // For pending-scan: 10 minutes from START time
+                    // For scanned: time until END time
+                    let timeRemaining, timerDisplay, statusColor, statusText;
+                    
+                    if (booking.status === 'pending-scan') {
+                        // Calculate 10 minutes from booking START time
+                        const confirmDeadline = new Date(startTime.getTime() + 10 * 60 * 1000);
+                        timeRemaining = confirmDeadline - now;
+                        
+                        const isExpired = timeRemaining <= 0;
+                        const minutes = Math.floor(Math.abs(timeRemaining) / (1000 * 60));
+                        const seconds = Math.floor((Math.abs(timeRemaining) % (1000 * 60)) / 1000);
+                        
+                        statusColor = '#ff9800';
+                        if (now < startTime) {
+                            // Future booking - not started yet
+                            const minutesUntilStart = Math.floor((startTime - now) / 60000);
+                            statusText = `⏰ Scheduled for ${startTime.toLocaleTimeString()}`;
+                            timerDisplay = `<span style="color: #00bfff;">📅 Starts in ${minutesUntilStart} minutes</span>`;
+                        } else if (isExpired) {
+                            // More than 10 minutes passed since start time
+                            statusText = '❌ Expired (Not Scanned)';
+                            statusColor = '#f44336';
+                            timerDisplay = '<span style="color: #f44336;">Auto-cancelled</span>';
+                        } else {
+                            // Within 10-minute window
+                            statusText = '⏳ Pending Scan';
+                            timerDisplay = `<span style="color: #ff9800;">⏱️ Scan within ${minutes}m ${seconds}s or auto-cancel</span>`;
+                        }
+                    } else if (booking.status === 'scanned') {
+                        timeRemaining = endTime - now;
+                        const isExpired = timeRemaining <= 0;
+                        const hours = Math.floor(Math.abs(timeRemaining) / (1000 * 60 * 60));
+                        const minutes = Math.floor((Math.abs(timeRemaining) % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((Math.abs(timeRemaining) % (1000 * 60)) / 1000);
+                        statusColor = '#4caf50';
+                        if (isExpired) {
+                            statusText = '✓ Completed';
+                            statusColor = '#9c27b0';
+                            timerDisplay = 'Booking completed';
+                        } else {
+                            statusText = '✅ Scanned';
+                            timerDisplay = `<span style="color: #4caf50;">⏱️ ${hours}h ${minutes}m ${seconds}s remaining</span>`;
+                        }
+                    } else if (booking.status === 'active') {
+                        // Walk-in booking linked to account
+                        timeRemaining = endTime - now;
+                        const isExpired = timeRemaining <= 0;
+                        const hours = Math.floor(Math.abs(timeRemaining) / (1000 * 60 * 60));
+                        const minutes = Math.floor((Math.abs(timeRemaining) % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((Math.abs(timeRemaining) % (1000 * 60)) / 1000);
+                        statusColor = '#00bfff';
+                        if (isExpired) {
+                            statusText = '✓ Completed';
+                            statusColor = '#9c27b0';
+                            timerDisplay = 'Booking completed';
+                        } else {
+                            statusText = '🚶 Walk-in Active';
+                            timerDisplay = `<span style="color: #00bfff;">⏱️ ${hours}h ${minutes}m ${seconds}s remaining</span>`;
+                            // Show walk-in code if available
+                            if (booking.walk_in_code) {
+                                timerDisplay += `<br><span style="color: #ff00ff; font-weight: bold;">Code: ${booking.walk_in_code}</span>`;
+                            }
+                        }
+                    } else if (booking.status === 'leave-early') {
+                        statusColor = '#2196f3';
+                        statusText = '🚪 Left Early';
+                        timerDisplay = `<span style="color: #2196f3;">Left at ${new Date(booking.leftEarlyAt).toLocaleTimeString()}</span>`;
+                    } else {
+                        // Completed or other status
+                        statusText = '✓ Completed';
+                        statusColor = '#9c27b0';
+                        timerDisplay = 'Booking completed';
+                    }
+                    
+                    return `
+                        <div class="booking-item" data-booking-id="${booking.id}" data-status="${booking.status}">
+                            <h4>Seat ${booking.seatId}</h4>
+                            <p><strong>Start:</strong> ${startTime.toLocaleString()}</p>
+                            <p><strong>End:</strong> ${endTime.toLocaleString()}</p>
+                            <p><strong>Duration:</strong> ${booking.duration} minutes</p>
+                            <p><strong>Status:</strong> <span style="color: ${statusColor}">${statusText}</span></p>
+                            <p style="margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px;">${timerDisplay}</p>
+                            <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+                                ${booking.status === 'pending-scan' ? `
+                                    <button class="btn btn-secondary" style="font-size: 12px; padding: 5px 10px; flex: 1; min-width: 100px;" onclick="showBookingConfirmation(${booking.id})">
+                                        📱 Show QR Code
+                                    </button>
+                                    <button class="btn btn-secondary" style="font-size: 12px; padding: 5px 10px; flex: 1; min-width: 100px; background: linear-gradient(45deg, #F44336, #da190b); border: none;" onclick="cancelBooking(${booking.id})">
+                                        Cancel
+                                    </button>
+                                ` : booking.status === 'scanned' ? `
+                                    <button class="btn btn-secondary" style="font-size: 12px; padding: 5px 10px; flex: 1; min-width: 100px;" onclick="leaveEarlyAction(${booking.id})">
+                                        🚪 Leave Early
+                                    </button>
+                                    <button class="btn btn-secondary" style="font-size: 12px; padding: 5px 10px; flex: 1; min-width: 100px;" onclick="showBookingConfirmation(${booking.id})">
+                                        ℹ️ Details
+                                    </button>
+                                ` : booking.status === 'active' ? `
+                                    <button class="btn btn-secondary" style="font-size: 12px; padding: 5px 10px; flex: 1; min-width: 100px; background: linear-gradient(45deg, #F44336, #da190b); border: none;" onclick="cancelBooking(${booking.id})">
+                                        🗑️ Cancel Walk-in
+                                    </button>
+                                    <button class="btn btn-secondary" style="font-size: 12px; padding: 5px 10px; flex: 1; min-width: 100px;" onclick="showBookingConfirmation(${booking.id})">
+                                        ℹ️ Details
+                                    </button>
+                                ` : `
+                                    <button class="btn btn-secondary" style="font-size: 12px; padding: 5px 10px;" onclick="showBookingConfirmation(${booking.id})">
+                                        📋 Show Details
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                container.innerHTML = html;
+                
+                // Start timer update for pending-scan bookings
+                updateBookingTimers();
+                
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+                container.innerHTML = '<p style="text-align: center; color: #f44336;">Failed to load bookings</p>';
+            }
+        }
+
+        function updateBookingTimers() {
+            const bookings = document.querySelectorAll('[data-booking-id]');
+            bookings.forEach(item => {
+                const bookingId = item.dataset.bookingId;
+                const status = item.dataset.status;
+                
+                // Find the booking data
+                const timerDisplay = item.querySelector('p:nth-of-type(5)');
+                if (!timerDisplay) return;
+                
+                // Get end time from "End: " line
+                const endLine = item.querySelector('p:nth-of-type(3)');
+                if (!endLine) return;
+                
+                const endTimeStr = endLine.textContent.replace('End: ', '').replace(' ', 'T');
+                const endTime = new Date(endTimeStr);
+                
+                // Validate date
+                if (isNaN(endTime.getTime())) {
+                    console.error('Invalid end time:', endTimeStr);
+                    return;
+                }
+                
+                const now = new Date();
+                const timeRemaining = endTime - now;
+                
+                if (timeRemaining <= 0) {
+                    timerDisplay.innerHTML = '<span style="color: #9c27b0;">✓ Completed</span>';
+                    return;
+                }
+                
+                const hours = Math.floor(timeRemaining / (1000 * 60 * 60));
+                const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                
+                if (status === 'pending-scan') {
+                    timerDisplay.innerHTML = `<span style="color: #ff9800;">⏱️ Expires in ${minutes}m ${seconds}s</span>`;
+                } else if (status === 'scanned') {
+                    timerDisplay.innerHTML = `<span style="color: #4caf50;">⏱️ ${minutes}m ${seconds}s remaining</span>`;
+                }
+            });
+        }
+        
+        // Start the timer interval once
+        setInterval(updateBookingTimers, 1000);
+
+        async function showBookingConfirmation(bookingOrId) {
+            let booking;
+            if (typeof bookingOrId === 'string' || typeof bookingOrId === 'number') {
+                // Fetch booking from current list
+                try {
+                    const bookings = await seatManager.getUserBookings();
+                    booking = bookings.find(b => b.id == bookingOrId);
+                } catch (error) {
+                    showNotification('Failed to load booking details', 'error');
+                    return;
+                }
+            } else {
+                booking = bookingOrId;
+            }
+            
+            if (!booking) {
+                showNotification('Booking not found', 'error');
+                return;
+            }
+            
+            const qrContent = document.getElementById('qrContent');
+            qrContent.innerHTML = `
+                <div style="text-align: center;">
+                    <h4>Seat ${booking.seatId} Booked Successfully!</h4>
+                    <p><strong>Booking ID:</strong> ${booking.id}</p>
+                    <p><strong>Duration:</strong> ${booking.duration} minutes</p>
+                    <p><strong>Start:</strong> ${new Date(booking.startTime).toLocaleString()}</p>
+                    <p><strong>End:</strong> ${new Date(booking.endTime).toLocaleString()}</p>
+                    <div style="margin: 20px 0; padding: 20px; background: white; border-radius: 12px; display: inline-block;">
+                        <div id="qrcode" style="display: inline-block;"></div>
+                    </div>
+                    <div style="margin: 15px 0; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(0,255,255,0.2);">
+                        <p style="font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 8px;">Verification Code:</p>
+                        <p style="font-size: 10px; word-break: break-all; color: #00ffff; font-family: monospace;">${booking.qrCode}</p>
+                    </div>
+                    <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin-top: 15px;">
+                        📱 Show this QR code to library staff for verification
+                    </p>
+                </div>
+            `;
+            
+            // Generate QR code
+            setTimeout(() => {
+                const qrContainer = document.getElementById('qrcode');
+                if (qrContainer && typeof QRCode !== 'undefined') {
+                    qrContainer.innerHTML = ''; // Clear any existing QR code
+                    new QRCode(qrContainer, {
+                        text: booking.qrCode,
+                        width: 200,
+                        height: 200,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                }
+            }, 100);
+            
+            document.getElementById('qrModal').style.display = 'block';
+        }
+
+        function closeQRModal() {
+            document.getElementById('qrModal').style.display = 'none';
+        }
+
+        async function cancelBooking(bookingId) {
+            console.log('Cancel booking called with ID:', bookingId);
+            
+            if (!confirm('Are you sure you want to cancel this booking?')) {
+                console.log('User cancelled the confirmation');
+                return;
+            }
+
+            try {
+                showNotification('Cancelling booking...', 'info');
+                const result = await seatManager.cancelBooking(bookingId);
+                
+                showNotification('✅ Booking cancelled successfully!', 'success');
+                
+                // Update UI immediately to reflect changes
+                await Promise.all([
+                    generateSeatMap(),
+                    loadMyBookings()
+                ]);
+                
+                console.log('✅ UI updated - booking removed from list');
+
+            } catch (error) {
+                console.error('Error cancelling booking:', error);
+                
+                // Check if booking was already cancelled
+                if (error.message.includes('not found') || error.message.includes('already cancelled')) {
+                    showNotification('⚠️ This booking was already cancelled. Refreshing...', 'error');
+                    // Refresh the UI to show current state
+                    await Promise.all([
+                        generateSeatMap(),
+                        loadMyBookings()
+                    ]);
+                } else {
+                    showNotification(`❌ Failed to cancel booking: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function leaveEarlyAction(bookingId) {
+            if (!confirm('Are you sure you want to leave this seat? This will free it for others.')) {
+                return;
+            }
+            
+            try {
+                showNotification('Leaving seat...', 'info');
+                const result = await seatManager.leaveEarly(bookingId);
+                
+                showNotification('✅ Seat vacated! Thank you for freeing it up.', 'success');
+                
+                // Refresh to show new status
+                await Promise.all([
+                    generateSeatMap(),
+                    loadMyBookings()
+                ]);
+                
+            } catch (error) {
+                console.error('Leave early error:', error);
+                showNotification(`❌ Failed to leave seat: ${error.message}`, 'error');
+            }
+        }
+
+        function openGroupModal() {
+            document.getElementById('groupModal').style.display = 'block';
+        }
+
+        function closeGroupModal() {
+            document.getElementById('groupModal').style.display = 'none';
+            // Clear form
+            document.getElementById('groupName').value = '';
+            document.getElementById('groupDescription').value = '';
+            document.getElementById('memberEmails').value = '';
+        }
+
+        async function createGroupBooking() {
+            const name = document.getElementById('groupName').value.trim();
+            const description = document.getElementById('groupDescription').value.trim();
+            const membersInput = document.getElementById('memberEmails').value.trim();
+            
+            if (!name) {
+                showNotification('Please enter a group name', 'error');
+                return;
+            }
+            
+            if (!membersInput) {
+                showNotification('Please enter at least one member (email or username)', 'error');
+                return;
+            }
+            
+            const currentUser = userDb.getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'offline_form.html';
+                return;
+            }
+            
+            try {
+                // Parse member identifiers (emails or usernames)
+                const memberIdentifiers = membersInput.split(',').map(id => id.trim()).filter(id => id);
+                
+                if (memberIdentifiers.length === 0) {
+                    showNotification('Please enter valid member emails or usernames', 'error');
+                    return;
+                }
+                
+                // Verify all members exist using API
+                showNotification('Validating group members...', 'info');
+                const validMembers = [];
+                const invalidMembers = [];
+                
+                for (const identifier of memberIdentifiers) {
+                    try {
+                        const response = await fetch('/api/user/find', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ identifier })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                            validMembers.push(result.data);
+                        } else {
+                            invalidMembers.push(identifier);
+                        }
+                    } catch (error) {
+                        invalidMembers.push(identifier);
+                    }
+                }
+                
+                if (invalidMembers.length > 0) {
+                    showNotification(
+                        `❌ Users not found: ${invalidMembers.join(', ')}\n\n` +
+                        `✅ Valid users: ${validMembers.map(u => u.username).join(', ')}\n\n` +
+                        'Please check the spelling or ask them to register first.',
+                        'error'
+                    );
+                    return;
+                }
+                
+                // Create group (for now, just show success with member details)
+                const memberList = validMembers.map(m => 
+                    `${m.full_name} (${m.username})`
+                ).join('\n');
+                
+                showNotification(
+                    `✅ Group "${name}" created successfully!\n\n` +
+                    `👥 Members found:\n${memberList}\n\n` +
+                    '🪑 You can now book multiple seats for your group.',
+                    'success'
+                );
+                
+                closeGroupModal();
+                
+            } catch (error) {
+                showNotification(`Failed to create group: ${error.message}`, 'error');
+            }
+        }
+
+        function goToDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+
+        async function logout() {
+            const token = localStorage.getItem('auth_token');
+            try {
+                await fetch('/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+            userManager.logout();
+            window.location.href = 'offline_form.html';
+        }
+
+        function showNotification(message, type = 'success') {
+            // Remove existing notification
+            const existing = document.querySelector('.notification');
+            if (existing) {
+                existing.remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = message; // Use innerHTML to support HTML content
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 6000); // Increased timeout for longer messages
+        }
+        
+        // Auto-refresh seat availability every 30 seconds to show expired bookings
+        setInterval(() => {
+            if (!document.hidden) {  // Only refresh when page is visible
+                generateSeatMap();
+            }
+        }, 30000);  // 30 seconds
+    </script>
+</body>
+</html>

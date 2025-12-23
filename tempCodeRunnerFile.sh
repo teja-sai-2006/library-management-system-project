@@ -1,0 +1,1 @@
+fuser -k 5000/tcp 2>/dev/null

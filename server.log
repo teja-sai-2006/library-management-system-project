@@ -1,0 +1,110 @@
+✅ Database initialized successfully at: /home/teja_sai/Music/dta_lab_project/library_database.db
+
+==================================================
+🚀 Starting Library Management System API Server...
+==================================================
+📊 Database: library_database.db
+🌐 Server will run on: http://localhost:5000
+
+📋 Available API endpoints:
+  POST /api/register     - Register new user
+  POST /api/login        - User login
+  POST /api/logout       - User logout
+  GET  /api/user/profile - Get user profile
+  GET  /api/seats        - Get all seats
+  GET  /api/seats/available - Get available seats
+  POST /api/bookings     - Create booking
+  GET  /api/bookings/user - Get user bookings
+  POST /api/bookings/{id}/cancel - Cancel booking
+  GET  /api/status       - System statistics
+  GET  /api/health       - Health check
+
+🏛️ Library Kiosk endpoints:
+  POST /api/kiosk/verify-qr - Verify QR code
+  POST /api/kiosk/confirm-booking - Confirm booking
+  POST /api/kiosk/verify-student - Verify student by roll number
+  POST /api/kiosk/book-seat - Book seat for walk-in student
+
+👑 Admin Panel endpoints:
+  POST /api/admin/login - Admin login
+  POST /api/admin/create - Create new admin
+  POST /api/admin/students/upload - Upload students CSV
+  GET  /api/admin/students - Get approved students
+  GET  /api/admin/users - Get all users
+  GET  /api/admin/bookings - Get all bookings
+  POST /api/admin/users/{id}/block - Block user
+  POST /api/admin/users/{id}/unblock - Unblock user
+  DELETE /api/admin/bookings/{id} - Remove booking
+  POST /api/admin/bookings/clear-all - Clear all bookings
+
+🌐 Access the system:
+  📚 Student Portal:  http://localhost:5000/offline_form.html
+  🏛️ Library Kiosk:   http://localhost:5000/library_kiosk.html
+  👑 Admin Panel:     http://localhost:5000/admin.html
+
+🔐 Default super admin: admin123 / nani#322989
+
+✅ Starting server...
+
+ * Serving Flask app 'api_server'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.17.6.132:5000
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 686-987-409
+127.0.0.1 - - [03/Dec/2025 12:16:26] "GET /api/health HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:16:37] "GET /offline_form.html HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:16:37] "GET /SignIn-SignUp-Form-main/img/log.svg HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:16:37] "GET /SignIn-SignUp-Form-main/img/register.svg HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:16:39] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+127.0.0.1 - - [03/Dec/2025 12:16:41] "GET /seat_booking.html HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:16:42] "GET /api/seats HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:16:42] "GET /api/bookings/user HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:16:42] "GET /api/user/profile HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:16:43] "GET /api/user/daily-usage HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:16:46] "GET /library_kiosk.html HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:16:50] "GET /admin.html HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:16:53] "[31m[1mGET /api/admin/students HTTP/1.1[0m" 401 -
+127.0.0.1 - - [03/Dec/2025 12:18:12] "POST /api/login HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:13] "GET /dashboard.html HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:13] "[36mGET /offline_resources/pattern_141.gif HTTP/1.1[0m" 304 -
+127.0.0.1 - - [03/Dec/2025 12:18:13] "GET /offline_resources/clouds_left.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:13] "GET /offline_resources/clouds_back.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:13] "GET /offline_resources/clouds_front.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:13] "GET /offline_resources/clouds_top.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:13] "GET /offline_resources/clouds_right.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:16] "[36mGET /seat_booking.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [03/Dec/2025 12:18:16] "GET /api/user/profile HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:16] "GET /api/bookings/user HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:16] "GET /api/seats HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:16] "GET /api/user/daily-usage HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:23] "[36mGET /dashboard.html HTTP/1.1[0m" 304 -
+127.0.0.1 - - [03/Dec/2025 12:18:23] "[36mGET /offline_resources/pattern_141.gif HTTP/1.1[0m" 304 -
+127.0.0.1 - - [03/Dec/2025 12:18:23] "[36mGET /offline_resources/clouds_right.jpg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [03/Dec/2025 12:18:23] "[36mGET /offline_resources/clouds_front.jpg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [03/Dec/2025 12:18:23] "[36mGET /offline_resources/clouds_back.jpg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [03/Dec/2025 12:18:23] "[36mGET /offline_resources/clouds_left.jpg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [03/Dec/2025 12:18:23] "[36mGET /offline_resources/clouds_top.jpg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [03/Dec/2025 12:18:25] "GET /books_tracking.html HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:26] "GET /api/books HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:26] "GET /offline_resources/space-background.jpg HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:18:26] "GET /api/books/categories HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:00] "POST /api/kiosk/verify-student HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:00] "GET /api/seats HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:10] "POST /api/kiosk/book-seat HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:10] "GET /api/seats HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:27] "POST /api/admin/login HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:27] "GET /api/admin/students HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:37] "GET /api/admin/users HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:41] "GET /api/admin/bookings HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:46] "GET /api/seats HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:48] "GET /api/admin/bookings HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:53] "GET /api/seats HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:19:57] "GET /api/admin/admins HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:20:00] "GET /api/books/categories HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:20:00] "GET /api/books HTTP/1.1" 200 -
+127.0.0.1 - - [03/Dec/2025 12:20:00] "GET /api/admin/books/issues HTTP/1.1" 200 -

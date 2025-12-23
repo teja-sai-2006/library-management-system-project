@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Dashboard controls */
+        .dashboard-header {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .dashboard-header h1 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #fff;
+            font-weight: 300;
+        }
+
+        .logout-btn {
+            background: linear-gradient(45deg, #ff4757, #ff6b7a);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: linear-gradient(45deg, #ff3742, #ff5664);
+            transform: translateY(-2px);
+        }
+
+        /* Dashboard Grid Buttons */
+        .dashboard-grid {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 60%;
+            display: flex;
+            gap: 40px;
+            z-index: 500;
+            pointer-events: none;
+        }
+
+        .grid-button {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 25px;
+            padding: 40px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            pointer-events: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .grid-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .grid-button:hover::before {
+            left: 100%;
+        }
+
+        .grid-button:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(0, 255, 255, 0.3);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.15);
+        }
+
+        .grid-button h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 600;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .seat-booking p {
+            font-size: 1.2em;
+            background: linear-gradient(45deg, #00ffff, #40e0d0, #00bfff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .books-tracking p {
+            font-size: 1.2em;
+            background: linear-gradient(45deg, #ff00ff, #ff69b4, #da70d6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .grid-button .icon {
+            font-size: 4em;
+            margin-bottom: 30px;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .grid-button:hover .icon {
+            opacity: 1;
+            transform: scale(1.2) rotateY(360deg);
+        }
+
+        .seat-booking {
+            border-left: 2px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .seat-booking:hover {
+            border-color: rgba(0, 255, 255, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.15);
+        }
+
+        .books-tracking {
+            border-right: 2px solid rgba(255, 0, 255, 0.2);
+        }
+
+        .books-tracking:hover {
+            border-color: rgba(255, 0, 255, 0.4);
+            box-shadow: 0 20px 40px rgba(255, 0, 255, 0.15);
+        }
+
+        .seat-booking .btn-text {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #00ffff;
+        }
+
+        .seat-booking:hover .btn-text {
+            background: rgba(0, 255, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .books-tracking .btn-text {
+            background: rgba(255, 0, 255, 0.1);
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 0, 255, 0.2);
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #ff00ff;
+        }
+
+        .books-tracking:hover .btn-text {
+            background: rgba(255, 0, 255, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        /* Butterfly Animation Keyframes */
+        @keyframes rotating {
+            0% { transform: rotate3d(0, 0, 0, 0deg); }
+            100% { transform: rotate3d(0, 1, 0, 720deg); }
+        }
+
+        @keyframes rotatingY {
+            100% { transform: rotateY(-360deg); }
+        }
+
+        @keyframes fluttering {
+            0%, 25%, 50%, 75%, 100% { transform: translate3d(0, 0, 0); }
+            10%, 60% { transform: translate3d(0, 150px, 0); }
+            30%, 80% { transform: translate3d(0, 50px, 0); }
+        }
+
+        @keyframes left-wing-flap {
+            0% { transform: translate3d(0, 0, 0) scaleX(1) rotate3d(0, 1, 0, 60deg); }
+            50% { transform: translate3d(0, 0, 0) scaleX(1) rotate3d(0, 1, 0, -70deg); }
+            100% { transform: translate3d(0, 0, 0) scaleX(1) rotate3d(0, 1, 0, 60deg); }
+        }
+
+        @keyframes right-wing-flap {
+            0% { transform: translate3d(0, 0, 0) scaleX(-1) rotate3d(0, 1, 0, 60deg); }
+            50% { transform: translate3d(0, 0, 0) scaleX(-1) rotate3d(0, 1, 0, -70deg); }
+            100% { transform: translate3d(0, 0, 0) scaleX(-1) rotate3d(0, 1, 0, 60deg); }
+        }
+
+        /* 3D Scene Styles */
+        .background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .scene3d {
+            perspective: 1000px;
+            perspective-origin: 50% 50%;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        .skybox.cube {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 512px;
+            height: 512px;
+            margin-left: -256px;
+            margin-top: -256px;
+            perspective-origin: 50% 50%;
+            transform-style: preserve-3d;
+            animation: rotatingY 40s linear infinite;
+        }
+
+        .skybox.cube var.scale {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 512px;
+            height: 512px;
+            margin-left: -256px;
+            margin-top: -256px;
+            perspective-origin: 50% 50%;
+            transform-style: preserve-3d;
+            transform: rotate3d(0, 0, 1, 15deg) translate3d(0, 100px, 0) scale3d(4, 6, 4);
+        }
+
+        .skybox.cube .face {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 512px;
+            height: 512px;
+            margin-left: -256px;
+            margin-top: -256px;
+            backface-visibility: hidden;
+        }
+
+        .skybox.cube .face.front {
+            transform: rotateY(0deg) translateZ(-256px);
+            background-image: url("offline_resources/clouds_front.jpg");
+        }
+
+        .skybox.cube .face.back {
+            transform: rotateY(180deg) translateZ(-256px);
+            background-image: url("offline_resources/clouds_back.jpg");
+        }
+
+        .skybox.cube .face.right {
+            transform: rotateY(-90deg) translateZ(-256px);
+            background-image: url("offline_resources/clouds_right.jpg");
+        }
+
+        .skybox.cube .face.left {
+            transform: rotateY(90deg) translateZ(-256px);
+            background-image: url("offline_resources/clouds_left.jpg");
+        }
+
+        .skybox.cube .face.top {
+            transform: rotateX(-90deg) translateZ(-256px);
+            background-image: url("offline_resources/clouds_top.jpg");
+        }
+
+        .skybox.cube .face.bottom {
+            transform: rotateX(90deg) translateZ(-256px);
+            background-image: url("offline_resources/hazy_lake_top.jpg");
+            background: none;
+        }
+
+        /* Butterfly Container Styles */
+        .butterfly_container {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 100px;
+            height: 100px;
+            margin-left: -50px;
+            margin-top: -50px;
+            transform-origin: 50% 50%;
+            transform-style: preserve-3d;
+            animation: rotatingY 10s linear infinite;
+        }
+
+        .butterfly_container var {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 100px;
+            height: 100px;
+            margin-left: -50px;
+            margin-top: -50px;
+            transform-style: preserve-3d;
+        }
+
+        .butterfly_container var.rotate3d {
+            transform: rotate3d(1, 0.5, 0, 70deg);
+        }
+
+        .butterfly_container var.translate3d {
+            transform: translate3d(-300px, 0px, 0px);
+        }
+
+        .butterfly_container var.translate3d-1 {
+            animation: fluttering 10s ease-in-out infinite;
+        }
+
+        .butterfly_container.scale_half var.scale {
+            transform: scale3d(0.5, 0.5, 0.5);
+        }
+
+        .butterfly_container.scale_third var.scale {
+            transform: scale3d(0.333, 0.333, 0.333);
+        }
+
+        .butterfly_container.scale_quarter var.scale {
+            transform: scale3d(0.25, 0.25, 0.25);
+        }
+
+        .butterfly_container figure.butterfly {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 100px;
+            height: 100px;
+            margin-left: -50px;
+            margin-top: -50px;
+            transform-style: preserve-3d;
+            transform-origin: 50% 50%;
+        }
+
+        .butterfly_container figure.butterfly .wing {
+            position: absolute;
+            width: 50px;
+            height: 100px;
+            transform-style: preserve-3d;
+            transform-origin: 50% 50%;
+            transform: translate3d(0, 0, 0) rotate3d(1, 0.5, 0, 45deg);
+        }
+
+        .butterfly_container figure.butterfly .wing.right {
+            transform-origin: 50px 50px;
+            transform: translate3d(0px, 0, 0) scaleX(-1) rotate3d(0, 1, 0, 45deg);
+            animation: right-wing-flap 0.5s ease-in-out infinite;
+        }
+
+        .butterfly_container figure.butterfly .wing.left {
+            transform-origin: 50px 50px;
+            animation: left-wing-flap 0.5s ease-in-out infinite;
+        }
+
+        .butterfly_container figure.butterfly .wing use {
+            display: block;
+            transform-style: preserve-3d;
+            fill: url(#image);
+            stroke: white;
+        }
+
+        .svg-defs {
+            position: absolute;
+            height: 0;
+            width: 0;
+        }
+
+        /* Individual butterfly animation delays - will be set inline */
+    </style>
+</head>
+<body>
+    <div class="dashboard-header">
+        <h1>🦋 Butterfly Dashboard</h1>
+        <button class="logout-btn" onclick="logout()">← Back to Login</button>
+    </div>
+
+    <!-- Dashboard Grid Buttons -->
+    <div class="dashboard-grid">
+        <div class="grid-button seat-booking" onclick="openSeatBooking()">
+            <div class="icon">🪑</div>
+            <h2>Seat Booking</h2>
+            <p>Reserve your perfect study spot in the library. Choose from quiet zones, group study areas, and computer stations.</p>
+            <div class="btn-text">Book Your Seat →</div>
+        </div>
+
+        <div class="grid-button books-tracking" onclick="openBooksTracking()">
+            <div class="icon">📚</div>
+            <h2>Books Tracking</h2>
+            <p>Track your borrowed books, due dates, renewals, and discover new titles in our digital catalog.</p>
+            <div class="btn-text">Track Books →</div>
+        </div>
+    </div>
+
+    <div class="background">
+        <div class="scene3d">
+            <!-- 3D Skybox - exact from original -->
+            <div class="skybox cube">
+                <var class="scale">
+                    <div class="face front"></div>
+                    <div class="face back"></div>
+                    <div class="face right"></div>
+                    <div class="face left"></div>
+                    <div class="face top"></div>
+                    <div class="face bottom"></div>
+                </var>
+            </div>
+
+            <!-- Butterfly Containers - exact from original with inline styles -->
+            <div class="butterfly_container">
+                <var class="rotate3d">
+                    <var class="scale">
+                        <var class="translate3d">
+                            <var class="translate3d-1">
+                                <figure class="butterfly">
+                                    <svg class="wing left" viewBox="0 0 50 100">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                    <svg class="wing right" viewBox="0 0 50 100">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                </figure>
+                            </var>
+                        </var>
+                    </var>
+                </var>
+            </div>
+
+            <div class="butterfly_container" style="margin-top: -150px; margin-left: 140px; animation-duration: 5s;">
+                <var class="rotate3d">
+                    <var class="scale">
+                        <var class="translate3d">
+                            <var class="translate3d-1">
+                                <figure class="butterfly">
+                                    <svg class="wing left" viewBox="0 0 50 100" style="animation-duration: .75s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                    <svg class="wing right" viewBox="0 0 50 100" style="animation-duration: .75s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                </figure>
+                            </var>
+                        </var>
+                    </var>
+                </var>
+            </div>
+
+            <div class="butterfly_container scale_half" style="margin-top: -10px; margin-left: 50px; animation-duration: 5s;">
+                <var class="rotate3d">
+                    <var class="scale">
+                        <var class="translate3d">
+                            <var class="translate3d-1">
+                                <figure class="butterfly">
+                                    <svg class="wing left" viewBox="0 0 50 100" style="animation-duration: .75s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                    <svg class="wing right" viewBox="0 0 50 100" style="animation-duration: .75s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                </figure>
+                            </var>
+                        </var>
+                    </var>
+                </var>
+            </div>
+
+            <div class="butterfly_container scale_half" style="margin-top: 20px; animation-duration: 20s;">
+                <var class="rotate3d">
+                    <var class="scale">
+                        <var class="translate3d">
+                            <var class="translate3d-1">
+                                <figure class="butterfly">
+                                    <svg class="wing left" viewBox="0 0 50 100" style="animation-duration: 1s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                    <svg class="wing right" viewBox="0 0 50 100" style="animation-duration: 1s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                </figure>
+                            </var>
+                        </var>
+                    </var>
+                </var>
+            </div>
+
+            <div class="butterfly_container scale_half" style="margin-top: 100px; margin-left: 50px; animation-duration: 20s;">
+                <var class="rotate3d">
+                    <var class="scale">
+                        <var class="translate3d">
+                            <var class="translate3d-1">
+                                <figure class="butterfly">
+                                    <svg class="wing left" viewBox="0 0 50 100" style="animation-duration: 1.2s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                    <svg class="wing right" viewBox="0 0 50 100" style="animation-duration: 1.2s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                </figure>
+                            </var>
+                        </var>
+                    </var>
+                </var>
+            </div>
+
+            <div class="butterfly_container scale_third" style="margin-top: -200px; margin-left: -100px; animation-duration: 15s;">
+                <var class="rotate3d">
+                    <var class="scale">
+                        <var class="translate3d">
+                            <var class="translate3d-1">
+                                <figure class="butterfly">
+                                    <svg class="wing left" viewBox="0 0 50 100" style="animation-duration: .35s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                    <svg class="wing right" viewBox="0 0 50 100" style="animation-duration: .35s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                </figure>
+                            </var>
+                        </var>
+                    </var>
+                </var>
+            </div>
+
+            <div class="butterfly_container scale_quarter" style="margin-top: -80px; margin-left: 120px; animation-duration: 18s;">
+                <var class="rotate3d">
+                    <var class="scale">
+                        <var class="translate3d">
+                            <var class="translate3d-1">
+                                <figure class="butterfly">
+                                    <svg class="wing left" viewBox="0 0 50 100" style="animation-duration: .9s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                    <svg class="wing right" viewBox="0 0 50 100" style="animation-duration: .9s;">
+                                        <use xlink:href="#shape-butterfly-1"></use>
+                                    </svg> 
+                                </figure>
+                            </var>
+                        </var>
+                    </var>
+                </var>
+            </div>
+        </div>
+    </div>
+
+    <!-- SVG Definitions - exact from original -->
+    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" xmlns:xml="http://www.w3.org/XML/1998/namespace" class="svg-defs">
+        <defs>
+            <pattern id='image' width="1" height="1" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <image xlink:href="offline_resources/pattern_141.gif" width="100" height="100" preserveAspectRatio="none"></image>
+            </pattern>
+            
+            <g id="shape-butterfly-1">
+                <path class="path" fill="url(#image)" clip-rule="evenodd" d="M8.65,2.85c0.934-0.2,2.15-0.333,3.65-0.4c1.534-0.1,2.667-0.083,3.4,0.05
+            c1.533,0.267,3.45,0.767,5.75,1.5c2.466,0.8,4.35,1.617,5.65,2.45c2.066,1.2,3.883,2.383,5.45,3.55c2.567,2.1,4.35,3.8,5.35,5.1
+            l2.1,2.5c0.933,1.167,1.517,1.983,1.75,2.45c0.333,0.767,1.083,2.117,2.25,4.05c0.233,0.467,0.717,1.683,1.45,3.65
+            c0.733,2.067,1.2,3.45,1.4,4.15c0.467,1.733,0.917,3.767,1.35,6.1l0.4,3.85l-0.25-3.4c-0.6-5.967-1.267-10.25-2-12.85
+            c-0.733-2.434-2.167-5.467-4.3-9.1c-0.966-1.667-1.566-3-1.8-4c-0.233-0.933-0.1-1.267,0.4-1c1.3,0.733,2.917,3.867,4.85,9.4
+            c1.667,4.7,2.85,11.2,3.55,19.5c0.567,6.934,0.667,11.917,0.3,14.95l0.2,0.05c0.231,0,0.348-0.05,0.35-0.15v0.05l0.1,0.05v27.4
+            c-0.032-0.018-0.065-0.035-0.1-0.05v-0.05c-0.7,0.267-0.983,0.117-0.85-0.45c0.067-0.333,0.017-0.817-0.15-1.45
+            c-0.2-0.6-0.316-0.983-0.35-1.15l-0.5-1.65c-0.533-2.967-0.833-5.034-0.9-6.2c-0.1-1.533-0.133-2.4-0.1-2.6
+            c0-0.933,0.167-1.667,0.5-2.2c0.567-0.9,0.684-1.75,0.35-2.55c-0.167-0.367-0.367-0.6-0.6-0.7c-0.333-0.133-0.517,0.283-0.55,1.25
+            c-0.033,1.533-0.167,2.9-0.4,4.1c-0.1,2.3-0.267,3.684-0.5,4.15c-0.333,0.667-1.25,2.95-2.75,6.85c-1.167,2.8-2.233,4.817-3.2,6.05
+            c-0.9,1.2-1.583,2.1-2.05,2.7c-0.8,1-1.434,1.667-1.9,2c-2.067,1.333-3.633,2.067-4.7,2.2c-3.033,0.267-4.95,0.317-5.75,0.15
+            c-0.8-0.167-1.383-0.217-1.75-0.15c-0.533,0.1-1.033,0.45-1.5,1.05c-0.5,0.667-1.217,1.284-2.15,1.85
+            c-0.934,0.567-1.85,0.934-2.75,1.1c-2.467,0.433-4.45,0.25-5.95-0.55c-0.7-0.4-1.467-1.15-2.3-2.25c-0.6-0.867-1.033-1.567-1.3-2.1
+            c-0.267-0.667-0.483-1.483-0.65-2.45c-0.3-1.467-0.383-2.717-0.25-3.75c0.267-1.9,0.45-3.05,0.55-3.45
+            c0.233-1.233,0.566-2.333,1-3.3C9.25,77.45,9.767,76.4,10,76c0.667-1.233,1.55-2.583,2.65-4.05c1.1-1.434,2.184-2.583,3.25-3.45
+            c0.367-0.3,1.15-0.867,2.35-1.7c0.767-0.566,1.917-1.25,3.45-2.05c1.733-0.933,3.267-1.633,4.6-2.1
+            c2.133-0.733,4.534-1.467,7.2-2.2c0.467-0.1,1.517-0.3,3.15-0.6c0.967-0.233,0.4-0.4-1.7-0.5c-2.434-0.1-4.534-0.3-6.3-0.6
+            c-1.566-0.267-3.383-0.7-5.45-1.3c-2.8-0.8-4.467-1.317-5-1.55c-1.567-0.667-3.2-1.75-4.9-3.25c-1.733-1.533-3-3.1-3.8-4.7
+            c-0.533-1.067-0.967-2.434-1.3-4.1c-0.233-1.067-0.3-2.133-0.2-3.2c0.133-0.833,0.183-1.3,0.15-1.4v-0.6
+            c-2.467-3.233-3.983-5.433-4.55-6.6c-0.533-1.033-0.883-1.833-1.05-2.4c-0.3-0.867-0.466-1.85-0.5-2.95
+            c-0.033-2.367,0.034-4.117,0.2-5.25c0.3-1.034,0.483-1.8,0.55-2.3c0.167-0.867,0.034-1.533-0.4-2c-0.6-0.7-1.133-1.517-1.6-2.45
+            c-0.566-1.133-0.833-2.117-0.8-2.95c0.033-1.333,0.167-2.367,0.4-3.1c0.367-1.267,1.05-2.267,2.05-3
+            C4.417,4.25,6.483,3.317,8.65,2.85z"/>
+            </g>
+        </defs>
+    </svg>
+
+    <script>
+        // Authentication check
+        (function checkAuth() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            if (!currentUser) {
+                console.log('No authenticated user found, redirecting to login...');
+                window.location.href = 'offline_form.html';
+                return;
+            }
+            console.log('Authenticated user:', currentUser.fullName);
+            
+            // Update welcome message with user name
+            const headerTitle = document.querySelector('.dashboard-header h1');
+            if (headerTitle) {
+                headerTitle.textContent = `🦋 Welcome, ${currentUser.fullName}!`;
+            }
+        })();
+
+        function logout() {
+            // Clear authentication data
+            localStorage.removeItem('currentUser');
+            console.log('User logged out');
+            
+            // Smooth transition back to login
+            document.body.style.transition = 'opacity 0.5s ease';
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                window.location.href = 'offline_form.html';
+            }, 500);
+        }
+
+        function openSeatBooking() {
+            // Smooth transition to seat booking page
+            document.body.style.transition = 'opacity 0.6s ease';
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                window.location.href = 'seat_booking.html';
+            }, 600);
+        }
+
+        function openBooksTracking() {
+            // Smooth transition to books tracking page
+            document.body.style.transition = 'opacity 0.6s ease';
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                window.location.href = 'books_tracking.html';
+            }, 600);
+        }
+
+        // Welcome message
+        setTimeout(() => {
+            console.log('🦋 Welcome to the Butterfly Dashboard! 🦋');
+            console.log('Enjoy the 3D butterfly flight simulation!');
+        }, 1000);
+    </script>
+</body>
+</html>
