@@ -58,29 +58,56 @@
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 11px 22px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin: 0 5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn:hover::before {
+            width: 250px;
+            height: 250px;
         }
 
         .btn-primary {
             background: linear-gradient(45deg, #00ffff, #0099cc);
             color: white;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.4);
         }
 
         .btn-secondary {
             background: rgba(255, 255, 255, 0.1);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
         }
 
         .main-container {
@@ -93,9 +120,19 @@
         }
 
         .seat-map-container {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 30px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 35px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .seat-map-container:hover {
+            border-color: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }

@@ -42,16 +42,23 @@
             background: linear-gradient(45deg, #ff4757, #ff6b7a);
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
+            padding: 10px 18px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
         }
 
         .logout-btn:hover {
             background: linear-gradient(45deg, #ff3742, #ff5664);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.5);
+        }
+        
+        .logout-btn:active {
+            transform: translateY(-1px);
         }
 
         /* Dashboard Grid Buttons */
@@ -70,13 +77,13 @@
 
         .grid-button {
             flex: 1;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 25px;
-            padding: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 45px;
             cursor: pointer;
-            transition: all 0.4s ease;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -94,8 +101,8 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transition: left 0.6s;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: left 0.7s ease;
         }
 
         .grid-button:hover::before {
@@ -103,21 +110,27 @@
         }
 
         .grid-button:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(0, 255, 255, 0.3);
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 255, 255, 0.4);
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 25px 50px rgba(0, 255, 255, 0.2), 0 0 100px rgba(0, 255, 255, 0.1);
+        }
+        
+        .grid-button:active {
+            transform: translateY(-8px) scale(1.02);
         }
 
         .grid-button h2 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
+            font-size: 2.6em;
+            margin-bottom: 22px;
             background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 600;
-            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            font-weight: 700;
+            text-shadow: 0 0 40px rgba(0, 255, 255, 0.6);
+            letter-spacing: -0.5px;
+        }
         }
 
         .seat-booking p {
